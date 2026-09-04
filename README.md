@@ -67,6 +67,13 @@ horizontal overflow at 320/375/1440 px, interaction changes state, survives a 40
 Passing the automated checks is not the same as being good — the four builds have not been played through
 by a human or scored against the rubric.
 
+## Playing the games
+
+See **[PLAYING.md](PLAYING.md)** — how to open each build and the full controls. Short version: the games
+are self-contained single files, so double-click `candidates/r1-districts/run-1/index.html` or
+`candidates/r1-bloom/run-1/index.html` and play. `r1-paradox-loop/run-1/index.html` is truncated and will
+open blank.
+
 ## Running things
 
 ```bash
