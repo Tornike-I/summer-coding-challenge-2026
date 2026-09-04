@@ -1,0 +1,1424 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Districts</title>
+<style>
+  :root{
+    --bg:#0d151d;
+    --bg-2:#111c26;
+    --panel:#17242f;
+    --panel-2:#1e2f3d;
+    --edge:#2b4055;
+    --ink:#eaf2f8;
+    --muted:#9db0c2;
+    --teal:#2fd6b6;
+    --teal-dim:#1c6f61;
+    --amber:#ffb43a;
+    --amber-dim:#7a5518;
+    --line:#dfeaf4;
+    --line-hot:#8fd7ff;
+    --focus:#8fd7ff;
+    --cursor:#ffffff;
+    --bad:#ff7a7a;
+    --good:#7ce6c4;
+    --radius:14px;
+    --radius-sm:10px;
+    --shadow:0 10px 30px rgba(0,0,0,.35);
+    --f-xs:11px; --f-sm:13px; --f-md:15px; --f-lg:20px; --f-xl:28px; --f-xxl:40px;
+    --ff:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans",sans-serif;
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden}
+  html{background:var(--bg)}
+  body{
+    font-family:var(--ff);
+    font-size:var(--f-md);
+    line-height:1.45;
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 700px at 50% -20%, #16303f 0%, rgba(22,48,63,0) 60%),
+      var(--bg);
+    min-height:100vh;
+    -webkit-text-size-adjust:100%;
+  }
+
+  #app{
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:10px 12px 14px;
+  }
+
+  .screen{width:100%;max-width:640px;display:flex;flex-direction:column;flex:1 1 auto}
+  .screen[hidden]{display:none}
+
+  .sr-only{
+    position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+    overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;
+  }
+
+  h1,h2,h3{margin:0;font-weight:700;letter-spacing:-.01em}
+  h1{font-size:var(--f-xxl);letter-spacing:-.03em}
+  h2{font-size:var(--f-lg)}
+  h3{font-size:var(--f-md)}
+  p{margin:0}
+
+  /* ---------- buttons ---------- */
+  button{
+    font:inherit;
+    color:inherit;
+    background:var(--panel-2);
+    border:1px solid var(--edge);
+    border-radius:var(--radius-sm);
+    min-height:44px;
+    padding:10px 16px;
+    cursor:pointer;
+    text-align:center;
+    transition:background .15s ease, transform .1s ease, border-color .15s ease;
+  }
+  button:hover:not(:disabled){background:#26394a}
+  button:active:not(:disabled){transform:translateY(1px)}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .btn-primary{
+    background:linear-gradient(180deg,#2fd6b6,#1fae94);
+    color:#052019;border-color:#2fd6b6;font-weight:700;
+  }
+  .btn-primary:hover:not(:disabled){background:linear-gradient(180deg,#43e5c6,#25bda1)}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap}
+  .btn-row>button{flex:1 1 130px}
+  .btn-ghost{background:transparent}
+  .btn-ghost:hover:not(:disabled){background:var(--panel-2)}
+
+  /* ---------- title screen ---------- */
+  .title-wrap{
+    flex:1 1 auto;display:flex;flex-direction:column;justify-content:center;
+    gap:22px;padding:18px 0;
+  }
+  .brand{display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+  .logo{display:flex;gap:14px;align-items:center}
+  .hook{color:var(--muted);font-size:var(--f-md);max-width:34ch}
+  .tag{
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:var(--f-xs);letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);border:1px solid var(--edge);border-radius:999px;padding:4px 10px;
+  }
+  .menu{display:flex;flex-direction:column;gap:10px;max-width:340px;width:100%}
+  .foot{color:var(--muted);font-size:var(--f-xs);margin-top:6px}
+
+  /* ---------- generic panel / page head ---------- */
+  .pagehead{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .pagehead h2{flex:1 1 auto}
+  .card{
+    background:var(--panel);border:1px solid var(--edge);
+    border-radius:var(--radius);padding:14px;
+  }
+  .stack{display:flex;flex-direction:column;gap:12px}
+  .muted{color:var(--muted)}
+  .small{font-size:var(--f-sm)}
+  .xsmall{font-size:var(--f-xs)}
+
+  /* ---------- how to play ---------- */
+  .step{display:flex;gap:14px;align-items:center}
+  .step .num{
+    flex:0 0 28px;height:28px;border-radius:999px;background:var(--panel-2);
+    border:1px solid var(--edge);display:grid;place-items:center;
+    font-size:var(--f-sm);font-weight:700;
+  }
+  .step .txt{flex:1 1 auto}
+  .step .txt h3{margin-bottom:2px}
+  .mini{
+    flex:0 0 auto;display:grid;gap:2px;
+    grid-template-columns:repeat(3,30px);
+    --bs:96px;--cols:3;
+  }
+  .mini .cell{border-radius:7px}
+  .mini .badge{font-size:8px;padding:1px 2px;border-radius:4px;white-space:nowrap}
+
+  /* ---------- level select ---------- */
+  .levels{display:flex;flex-direction:column;gap:10px}
+  .levelcard{
+    display:flex;gap:12px;align-items:center;text-align:left;
+    width:100%;padding:12px;border-radius:var(--radius);
+    background:var(--panel);border:1px solid var(--edge);
+  }
+  .levelcard .idx{
+    flex:0 0 38px;height:38px;border-radius:10px;display:grid;place-items:center;
+    background:var(--panel-2);border:1px solid var(--edge);font-weight:700;
+  }
+  .levelcard .meta{flex:1 1 auto;min-width:0}
+  .levelcard .meta .nm{display:block;font-weight:700}
+  .levelcard .meta .sub{display:block;color:var(--muted);font-size:var(--f-sm)}
+  .levelcard .score{flex:0 0 auto;text-align:right;font-size:var(--f-sm);color:var(--muted)}
+  .levelcard .score b{display:block;color:var(--ink);font-size:var(--f-md)}
+  .levelcard[data-locked="1"]{opacity:.55}
+  .levelcard[data-solved="1"] .idx{background:var(--teal-dim);border-color:var(--teal);color:#eafff9}
+
+  /* ---------- play screen ---------- */
+  .topbar{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .topbar .who{flex:1 1 auto;min-width:0}
+  .topbar .who .lv{font-size:var(--f-xs);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .topbar .who .nm{font-weight:700;font-size:var(--f-md);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .icon-btn{min-height:40px;padding:8px 12px;font-size:var(--f-sm)}
+
+  .status{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:6px;
+    background:var(--panel);border:1px solid var(--edge);
+    border-radius:var(--radius);padding:8px;margin-bottom:8px;
+  }
+  .stat{text-align:center;min-width:0}
+  .stat .k{font-size:var(--f-xs);color:var(--muted);letter-spacing:.06em;text-transform:uppercase;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .stat .v{font-size:var(--f-md);font-weight:700;white-space:nowrap}
+  .seats{
+    display:flex;gap:6px;align-items:center;justify-content:center;
+    grid-column:1 / -1;border-top:1px solid var(--edge);padding-top:6px;flex-wrap:wrap;
+  }
+  .seat{
+    display:inline-flex;align-items:center;gap:6px;font-size:var(--f-sm);
+    padding:2px 8px;border-radius:999px;border:1px solid var(--edge);background:var(--bg-2);
+  }
+  .seat b{font-variant-numeric:tabular-nums}
+  .seat.t{border-color:var(--teal-dim)}
+  .seat.a{border-color:var(--amber-dim)}
+
+  /* ---------- board ---------- */
+  #board{
+    --bs:min(94vw, 50vh, 520px);
+    width:var(--bs);
+    margin:0 auto;
+    touch-action:none;
+    -webkit-user-select:none;user-select:none;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(var(--cols),1fr);
+    gap:2px;
+    padding:5px;
+    background:var(--bg-2);
+    border:1px solid var(--edge);
+    border-radius:var(--radius);
+    touch-action:none;
+  }
+  .grid:focus{outline:none}
+  .grid:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+  .row{display:contents}
+
+  .cell{
+    position:relative;
+    aspect-ratio:1 / 1;
+    border-radius:var(--radius-sm);
+    background:#1b2a38;
+    display:grid;place-items:center;
+    font-size:calc(var(--bs) / var(--cols) * 0.34);
+    transition:background .12s ease;
+  }
+  .cell.assigned{background:#243747}
+  .cell.hot{background:#2a4356}
+  .cell.refused{outline:3px solid var(--bad);outline-offset:-3px;animation:shake .3s ease}
+  .grid.kb .cell.cursor{outline:3px dashed var(--cursor);outline-offset:2px;z-index:3}
+  @keyframes shake{
+    0%,100%{transform:translateX(0)}
+    25%{transform:translateX(-3px)}
+    75%{transform:translateX(3px)}
+  }
+
+  .mark{
+    width:46%;height:46%;border-radius:50%;
+    display:block;
+  }
+  .mark.t{background:var(--teal);box-shadow:0 0 0 1px rgba(0,0,0,.25) inset}
+  .mark.a{background:transparent;border:0.30em solid var(--amber)}
+
+  .badge{
+    position:absolute;top:2px;left:2px;
+    font-size:clamp(9px, calc(var(--bs) / var(--cols) * 0.20), 13px);
+    line-height:1;font-weight:700;font-variant-numeric:tabular-nums;
+    padding:2px 4px;border-radius:6px;
+    background:#0b141c;border:1px solid var(--edge);color:var(--ink);
+    pointer-events:none;
+  }
+  .badge.win-t{border-color:var(--teal);color:var(--teal)}
+  .badge.win-a{border-color:var(--amber);color:var(--amber)}
+  .badge.tie{border-color:var(--muted);color:var(--muted)}
+  .badge[hidden]{display:none}
+
+  /* ---------- district chips ---------- */
+  .chips{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin:8px 0}
+  .chip{
+    font-size:var(--f-xs);font-variant-numeric:tabular-nums;
+    padding:3px 6px;border-radius:8px;border:1px solid var(--edge);
+    background:var(--panel);color:var(--muted);white-space:nowrap;
+  }
+  .chip.win-t{border-color:var(--teal);color:var(--teal)}
+  .chip.win-a{border-color:var(--amber);color:var(--amber)}
+  .chip.tie{border-color:#5b6f82;color:#c3d2df}
+  .chip.active{background:var(--panel-2);color:var(--ink);border-color:var(--line-hot)}
+
+  .controls{display:flex;gap:8px}
+  .controls button{flex:1 1 0;padding:10px 6px;font-size:var(--f-sm)}
+  .keyhelp{color:var(--muted);font-size:var(--f-xs);text-align:center;margin-top:8px}
+  .hintbox{
+    margin-top:8px;font-size:var(--f-sm);color:var(--ink);
+    background:var(--panel);border:1px solid var(--edge);border-left:3px solid var(--amber);
+    border-radius:8px;padding:8px 10px;
+  }
+  .hintbox[hidden]{display:none}
+
+  /* ---------- overlay ---------- */
+  .overlay{
+    position:fixed;inset:0;z-index:50;
+    background:rgba(6,12,18,.72);
+    display:flex;align-items:center;justify-content:center;
+    padding:16px;
+  }
+  .overlay[hidden]{display:none}
+  .dialog{
+    width:100%;max-width:440px;max-height:calc(100vh - 32px);overflow-y:auto;
+    background:var(--panel);border:1px solid var(--edge);
+    border-radius:var(--radius);box-shadow:var(--shadow);
+    padding:18px;display:flex;flex-direction:column;gap:14px;
+  }
+  .dialog[hidden]{display:none}
+  .dialog h2{font-size:var(--f-xl)}
+
+  .compare{display:flex;flex-direction:column;gap:10px}
+  .cmp-row{display:flex;flex-direction:column;gap:5px}
+  .cmp-row .lab{display:flex;justify-content:space-between;font-size:var(--f-xs);
+    letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .bar{display:flex;height:26px;border-radius:8px;overflow:hidden;border:1px solid var(--edge);background:var(--bg-2)}
+  .bar>span{
+    display:grid;place-items:center;font-size:var(--f-xs);font-weight:700;
+    color:#06120f;min-width:0;overflow:hidden;white-space:nowrap;
+  }
+  .bar .b-t{background:var(--teal)}
+  .bar .b-a{background:var(--amber)}
+  .bar .b-x{background:#42576a;color:var(--ink)}
+  .verdict{font-size:var(--f-md);font-weight:700}
+  .verdict.win{color:var(--good)}
+  .verdict.lose{color:var(--bad)}
+  .kv{display:flex;gap:8px;flex-wrap:wrap}
+  .kv .box{
+    flex:1 1 90px;background:var(--bg-2);border:1px solid var(--edge);
+    border-radius:10px;padding:8px;text-align:center;
+  }
+  .kv .box .k{font-size:var(--f-xs);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+  .kv .box .v{font-size:var(--f-lg);font-weight:700;font-variant-numeric:tabular-nums}
+
+  .trophy{font-size:var(--f-xxl);line-height:1;text-align:center}
+
+  @media (max-width:400px){
+    :root{--f-xxl:34px;--f-xl:24px;--f-lg:18px}
+    #app{padding:8px 8px 10px}
+    .status{padding:6px}
+    .stat .k{font-size:10px;letter-spacing:0}
+    .mini{grid-template-columns:repeat(3,20px);--bs:66px}
+  }
+  @media (max-width:420px){
+    .keyhelp{display:none}
+  }
+  @media (max-height:620px){
+    #board{--bs:min(94vw, 46vh, 520px)}
+  }
+  @media (min-width:900px){
+    :root{--f-md:16px;--f-sm:14px}
+    #board{--bs:min(70vw, 56vh, 560px)}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{
+      animation-duration:.001ms !important;
+      animation-iteration-count:1 !important;
+      transition-duration:.001ms !important;
+      scroll-behavior:auto !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ================= TITLE ================= -->
+  <section class="screen" id="screen-title" aria-label="Title">
+    <div class="title-wrap">
+      <div class="brand">
+        <span class="tag">A map-drawing puzzle</span>
+        <div class="logo">
+          <svg width="48" height="48" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+            <rect x="1" y="1" width="46" height="46" rx="10" fill="#1b2a38" stroke="#2b4055"/>
+            <path d="M4 17h18V4" fill="none" stroke="#dfeaf4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M22 44V30h22" fill="none" stroke="#dfeaf4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="12" cy="10" r="3.4" fill="#2fd6b6"/>
+            <circle cx="34" cy="12" r="3.4" fill="none" stroke="#ffb43a" stroke-width="2.6"/>
+            <circle cx="12" cy="36" r="3.4" fill="none" stroke="#ffb43a" stroke-width="2.6"/>
+            <circle cx="34" cy="36" r="3.4" fill="#2fd6b6"/>
+          </svg>
+          <h1>Districts</h1>
+        </div>
+        <p class="hook">Teal is outnumbered. Draw the map anyway &mdash; fewest votes, most seats.</p>
+      </div>
+
+      <div class="menu">
+        <button id="btn-play" class="btn-primary">Play</button>
+        <button id="btn-howto">How to play</button>
+        <button id="btn-levels">Levels</button>
+      </div>
+
+      <p class="foot">Two invented colours on an abstract council. Progress is saved on this device when the browser allows it.</p>
+    </div>
+  </section>
+
+  <!-- ================= HOW TO PLAY ================= -->
+  <section class="screen" id="screen-howto" hidden aria-label="How to play">
+    <div class="pagehead">
+      <h2>How to play</h2>
+      <button id="btn-howto-back" class="icon-btn btn-ghost">Back</button>
+    </div>
+
+    <div class="stack">
+      <div class="card step">
+        <span class="num">1</span>
+        <div class="mini" aria-hidden="true">
+          <div class="cell assigned hot" style="box-shadow:inset 0 3px 0 0 #8fd7ff,inset 0 -3px 0 0 #8fd7ff,inset 3px 0 0 0 #8fd7ff,inset -3px 0 0 0 #8fd7ff"><span class="mark t"></span></div>
+          <div class="cell"><span class="mark a"></span></div>
+          <div class="cell"><span class="mark t"></span></div>
+          <div class="cell"><span class="mark a"></span></div>
+          <div class="cell"><span class="mark a"></span></div>
+          <div class="cell"><span class="mark t"></span></div>
+        </div>
+        <div class="txt">
+          <h3>Start a district</h3>
+          <p class="small muted">Click, tap or press Enter on any free cell. That opens district&nbsp;1.</p>
+        </div>
+      </div>
+
+      <div class="card step">
+        <span class="num">2</span>
+        <div class="mini" aria-hidden="true">
+          <div class="cell assigned hot" style="box-shadow:inset 0 3px 0 0 #8fd7ff,inset 0 -3px 0 0 #8fd7ff,inset 3px 0 0 0 #8fd7ff"><span class="mark t"></span></div>
+          <div class="cell assigned hot" style="box-shadow:inset 0 3px 0 0 #8fd7ff,inset 0 -3px 0 0 #8fd7ff,inset -3px 0 0 0 #8fd7ff"><span class="mark a"></span></div>
+          <div class="cell" style="outline:3px solid #ff7a7a;outline-offset:-3px"><span class="mark t"></span></div>
+          <div class="cell"><span class="mark a"></span></div>
+          <div class="cell"><span class="mark t"></span></div>
+          <div class="cell"><span class="mark a"></span></div>
+        </div>
+        <div class="txt">
+          <h3>Keep it joined</h3>
+          <p class="small muted">Drag to paint. You may only add cells touching the district you are drawing, so it can never break apart. It locks at its exact size and the next one opens.</p>
+        </div>
+      </div>
+
+      <div class="card step">
+        <span class="num">3</span>
+        <div class="mini" aria-hidden="true">
+          <div class="cell assigned" style="box-shadow:inset 0 3px 0 0 #dfeaf4,inset 3px 0 0 0 #dfeaf4"><span class="badge win-t">3&ndash;1</span><span class="mark t"></span></div>
+          <div class="cell assigned" style="box-shadow:inset 0 3px 0 0 #dfeaf4,inset -3px 0 0 0 #dfeaf4"><span class="mark t"></span></div>
+          <div class="cell"><span class="mark a"></span></div>
+          <div class="cell assigned" style="box-shadow:inset 0 -3px 0 0 #dfeaf4,inset 3px 0 0 0 #dfeaf4"><span class="mark a"></span></div>
+          <div class="cell assigned" style="box-shadow:inset 0 -3px 0 0 #dfeaf4,inset -3px 0 0 0 #dfeaf4"><span class="mark t"></span></div>
+          <div class="cell"><span class="mark t"></span></div>
+        </div>
+        <div class="txt">
+          <h3>Win the seats, not the votes</h3>
+          <p class="small muted">Whoever holds more cells in a district takes that seat. An even split is a tie and counts for nobody. Take more seats than Amber and the level is passed.</p>
+        </div>
+      </div>
+
+      <div class="card small">
+        <p><span class="mark t" style="display:inline-block;width:12px;height:12px;vertical-align:-1px"></span>
+          <b>Teal</b> is a solid dot.
+          <span class="mark a" style="display:inline-block;width:12px;height:12px;border-width:3px;vertical-align:-1px;margin-left:10px"></span>
+          <b>Amber</b> is a ring. Shape as well as colour, so the board reads either way.</p>
+      </div>
+
+      <div class="btn-row">
+        <button id="btn-howto-play" class="btn-primary">Got it &mdash; play</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= LEVEL SELECT ================= -->
+  <section class="screen" id="screen-levels" hidden aria-label="Level select">
+    <div class="pagehead">
+      <h2>Levels</h2>
+      <button id="btn-levels-back" class="icon-btn btn-ghost">Back</button>
+    </div>
+    <div class="levels" id="level-list"></div>
+    <p class="foot" id="levels-note"></p>
+  </section>
+
+  <!-- ================= PLAY ================= -->
+  <section class="screen" id="screen-play" hidden aria-label="Playing">
+    <div class="topbar">
+      <div class="who">
+        <div class="lv" id="play-lv">Level 1 of 5</div>
+        <div class="nm" id="play-nm">First Draw</div>
+      </div>
+      <button id="btn-pause" class="icon-btn">Pause</button>
+    </div>
+
+    <div class="status">
+      <div class="stat"><div class="k">District</div><div class="v" id="st-district">1/4</div></div>
+      <div class="stat"><div class="k">Cells left</div><div class="v" id="st-left">4</div></div>
+      <div class="stat"><div class="k">Districts left</div><div class="v" id="st-remaining">4</div></div>
+      <div class="stat"><div class="k">Moves</div><div class="v" id="st-moves">0</div></div>
+      <div class="seats">
+        <span class="seat t"><span class="mark t" style="width:10px;height:10px"></span>Teal <b id="st-seat-t">0</b></span>
+        <span class="seat"><span aria-hidden="true">=</span> Tied <b id="st-seat-x">0</b></span>
+        <span class="seat a"><span class="mark a" style="width:10px;height:10px;border-width:3px"></span>Amber <b id="st-seat-a">0</b></span>
+        <span class="seat">Best <b id="st-best">&mdash;</b></span>
+        <span class="seat">Hints <b id="st-hints">0</b></span>
+      </div>
+    </div>
+
+    <div id="board">
+      <div class="grid" id="grid" role="grid" tabindex="0" aria-label="Voter grid"></div>
+    </div>
+
+    <div class="chips" id="chips"></div>
+
+    <div class="controls">
+      <button id="btn-undo">Undo <span class="xsmall muted">(U)</span></button>
+      <button id="btn-clear">Clear <span class="xsmall muted">(R)</span></button>
+      <button id="btn-hint">Hint <span class="xsmall muted">(H)</span></button>
+    </div>
+
+    <p class="hintbox" id="hintbox" hidden></p>
+    <p class="keyhelp">Arrows move &middot; Enter or Space assigns &middot; U undo &middot; R clear &middot; Esc pause</p>
+  </section>
+</div>
+
+<!-- ================= OVERLAYS ================= -->
+<div class="overlay" id="overlay" hidden>
+
+  <div class="dialog" id="ov-paused" role="dialog" aria-modal="true" aria-labelledby="paused-title" hidden>
+    <h2 id="paused-title">Paused</h2>
+    <p class="muted small">Your map is exactly where you left it.</p>
+    <div class="stack">
+      <button id="btn-resume" class="btn-primary">Resume</button>
+      <button id="btn-restart">Restart level</button>
+      <button id="btn-to-levels">Level select</button>
+      <button id="btn-to-title" class="btn-ghost">Back to title</button>
+    </div>
+  </div>
+
+  <div class="dialog" id="ov-solved" role="dialog" aria-modal="true" aria-labelledby="solved-title" hidden>
+    <h2 id="solved-title">Level passed</h2>
+    <p class="verdict win" id="solved-line"></p>
+    <div class="compare" id="solved-compare"></div>
+    <div class="kv">
+      <div class="box"><div class="k">Moves</div><div class="v" id="solved-moves">0</div></div>
+      <div class="box"><div class="k">Best</div><div class="v" id="solved-best">0</div></div>
+      <div class="box"><div class="k">Hints</div><div class="v" id="solved-hints">0</div></div>
+    </div>
+    <p class="small muted" id="solved-note"></p>
+    <div class="btn-row">
+      <button id="btn-next" class="btn-primary">Next level</button>
+      <button id="btn-retry-solved">Retry</button>
+      <button id="btn-levels-solved" class="btn-ghost">Levels</button>
+    </div>
+  </div>
+
+  <div class="dialog" id="ov-failed" role="dialog" aria-modal="true" aria-labelledby="failed-title" hidden>
+    <h2 id="failed-title">Board full &mdash; Teal fell short</h2>
+    <p class="verdict lose" id="failed-line"></p>
+    <div class="compare" id="failed-compare"></div>
+    <p class="small muted" id="failed-why"></p>
+    <div class="btn-row">
+      <button id="btn-retry-failed" class="btn-primary">Retry</button>
+      <button id="btn-levels-failed">Back to levels</button>
+    </div>
+  </div>
+
+  <div class="dialog" id="ov-complete" role="dialog" aria-modal="true" aria-labelledby="complete-title" hidden>
+    <p class="trophy" aria-hidden="true">&#127942;</p>
+    <h2 id="complete-title">The council is yours</h2>
+    <p>Across <span id="cmp-count">all five maps</span> Teal drew
+      <b id="cmp-votes">0</b> voters against Amber's <b id="cmp-votes-a">0</b> &mdash; and took
+      <b id="cmp-seats">0</b> seats to Amber's <b id="cmp-seats-a">0</b><span id="cmp-tied"></span>.</p>
+    <p class="small muted">Nothing here cheated. Every district was equal-sized and joined edge to edge.
+      The only thing that changed was where the lines went.</p>
+    <div class="kv">
+      <div class="box"><div class="k">Total moves</div><div class="v" id="cmp-moves">0</div></div>
+      <div class="box"><div class="k">Hints used</div><div class="v" id="cmp-hints">0</div></div>
+    </div>
+    <div class="btn-row">
+      <button id="btn-complete-levels" class="btn-primary">Level select</button>
+      <button id="btn-complete-title" class="btn-ghost">Title</button>
+    </div>
+  </div>
+
+</div>
+
+<p id="live" class="sr-only" role="status" aria-live="polite"></p>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ============================================================
+     Levels. Every board below was checked with a brute-force
+     partition search: each has at least one legal map where Teal
+     takes strictly more districts than Amber.
+     ============================================================ */
+  var LEVELS = [
+    {
+      id: 1, name: 'First Draw', w: 4, h: 4, k: 4,
+      rows: ['TTAT', 'TAAT', 'TAAT', 'TTAT'],
+      blurb: 'Teal is already ahead. Learn the pen.',
+      hint: 'Districts here are exactly 4 cells. A 2×2 square is the easiest shape to start with — but watch out for even splits, which help nobody.'
+    },
+    {
+      id: 2, name: 'Dead Heat', w: 5, h: 5, k: 5,
+      rows: ['TATAT', 'ATATA', 'TATAT', 'ATATA', 'AATTA'],
+      blurb: 'Almost tied on votes. Shape decides the council.',
+      hint: 'A district of 5 can never tie — 3 of 5 is a win, and a win by one counts the same as a win by five. Find three shapes that each catch 3 Teal.'
+    },
+    {
+      id: 3, name: 'The Minority', w: 6, h: 6, k: 6,
+      rows: ['AAAAAA', 'TTATTA', 'TTATTA', 'ATTATT', 'ATTATT', 'AAAAAA'],
+      blurb: 'Teal is outnumbered 20 to 16. Win anyway.',
+      hint: 'You do not have to win every district — just more of them than Amber. Sweep Amber’s surplus voters into as few districts as you can and let those go.'
+    },
+    {
+      id: 4, name: 'Packed', w: 6, h: 6, k: 4,
+      rows: ['TATTTA', 'TTAATA', 'ATTTAT', 'AAAATT', 'AAATAA', 'AAATAT'],
+      blurb: 'Big districts, and one very solid corner.',
+      hint: 'That solid block of Amber is worth exactly one district and no more. Hand it exactly one, and spend the rest of the board on narrow wins.'
+    },
+    {
+      id: 5, name: 'The Finale', w: 7, h: 7, k: 7,
+      rows: ['TTAAATT', 'TAAAAAT', 'ATATATA', 'AAAAAAA', 'ATATATA', 'TAAAAAT', 'TTAAATT'],
+      blurb: 'Teal holds barely a third of the board. Take the council.',
+      hint: 'Each corner holds 4 Teal within easy reach of each other, and a district of 7 only needs 4 to win. The middle is where Amber’s votes go to be wasted.'
+    }
+  ];
+
+  var STORE_KEY = 'districts.v1';
+  var BW = 3; // district boundary thickness, px
+
+  var Store = (function () {
+    var memory = { unlocked: 0, best: {}, res: {}, seen: 0 };
+    var live = true;
+
+    function ls() {
+      try {
+        var s = window.localStorage;
+        if (!s) return null;
+        var probe = '__d_probe__';
+        s.setItem(probe, '1');
+        s.removeItem(probe);
+        return s;
+      } catch (e) { return null; }
+    }
+
+    function sane(raw) {
+      var out = { unlocked: 0, best: {}, res: {}, seen: 0 };
+      if (!raw || typeof raw !== 'object') return out;
+      var u = raw.unlocked;
+      if (typeof u === 'number' && isFinite(u)) {
+        out.unlocked = Math.max(0, Math.min(LEVELS.length - 1, Math.floor(u)));
+      }
+      out.seen = raw.seen === 1 ? 1 : 0;
+      var hasBest = raw.best && typeof raw.best === 'object';
+      var hasRes = raw.res && typeof raw.res === 'object';
+      for (var i = 0; i < LEVELS.length; i++) {
+        var key = String(LEVELS[i].id);
+        if (hasBest) {
+          var v = raw.best[key];
+          if (typeof v === 'number' && isFinite(v) && v > 0) out.best[key] = Math.floor(v);
+        }
+        if (hasRes) {
+          var r = raw.res[key];
+          if (Object.prototype.toString.call(r) === '[object Array]' && r.length === 3 &&
+              r.every(function (q) { return typeof q === 'number' && isFinite(q) && q >= 0; })) {
+            out.res[key] = [Math.floor(r[0]), Math.floor(r[1]), Math.floor(r[2])];
+          }
+        }
+      }
+      return out;
+    }
+
+    function load() {
+      var s = ls();
+      if (!s) { live = false; return memory; }
+      try {
+        var txt = s.getItem(STORE_KEY);
+        if (!txt) return memory;
+        memory = sane(JSON.parse(txt));
+      } catch (e) {
+        memory = { unlocked: 0, best: {}, res: {}, seen: 0 };
+      }
+      return memory;
+    }
+
+    function save() {
+      var s = ls();
+      if (!s) { live = false; return; }
+      try { s.setItem(STORE_KEY, JSON.stringify(memory)); }
+      catch (e) { live = false; }
+    }
+
+    return {
+      data: function () { return memory; },
+      init: function () { memory = sane(load()); return memory; },
+      commit: save,
+      persistent: function () { return live; }
+    };
+  })();
+
+  var progress = Store.init();
+
+  function $(id) { return document.getElementById(id); }
+
+  var screens = {
+    title: $('screen-title'),
+    howto: $('screen-howto'),
+    levels: $('screen-levels'),
+    play: $('screen-play')
+  };
+  var overlay = $('overlay');
+  var panels = {
+    paused: $('ov-paused'),
+    solved: $('ov-solved'),
+    failed: $('ov-failed'),
+    complete: $('ov-complete')
+  };
+  var grid = $('grid');
+  var live = $('live');
+  var chipsEl = $('chips');
+  var hintbox = $('hintbox');
+
+  var currentScreen = 'title';
+  var openPanel = null;
+  var lastFocus = null;
+
+  var liveFlip = false;
+  function announce(msg) {
+    liveFlip = !liveFlip;
+    live.textContent = msg + (liveFlip ? '' : ' ');
+  }
+
+  function showScreen(name) {
+    for (var k in screens) {
+      if (Object.prototype.hasOwnProperty.call(screens, k)) screens[k].hidden = (k !== name);
+    }
+    currentScreen = name;
+    closeOverlay();
+    window.scrollTo(0, 0);
+  }
+
+  function focusables(root) {
+    var list = root.querySelectorAll('button:not([disabled]), [tabindex]:not([tabindex="-1"])');
+    return Array.prototype.slice.call(list);
+  }
+
+  function openOverlay(name) {
+    lastFocus = document.activeElement;
+    for (var k in panels) {
+      if (Object.prototype.hasOwnProperty.call(panels, k)) panels[k].hidden = (k !== name);
+    }
+    overlay.hidden = false;
+    openPanel = name;
+    var f = focusables(panels[name]);
+    if (f.length) f[0].focus();
+  }
+
+  function closeOverlay() {
+    if (overlay.hidden) { openPanel = null; return; }
+    overlay.hidden = true;
+    openPanel = null;
+    if (lastFocus && document.contains(lastFocus) && lastFocus.offsetParent !== null) {
+      try { lastFocus.focus(); } catch (e) { /* element went away */ }
+    }
+    lastFocus = null;
+  }
+
+  overlay.addEventListener('keydown', function (e) {
+    if (e.key !== 'Tab' || !openPanel) return;
+    var f = focusables(panels[openPanel]);
+    if (!f.length) return;
+    var first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
+
+  var G = null;
+  var sessionHints = 0;
+
+  function buildLevelState(index) {
+    var L = LEVELS[index];
+    var n = L.w * L.h;
+    var board = new Int8Array(n);
+    for (var y = 0; y < L.h; y++) {
+      for (var x = 0; x < L.w; x++) {
+        board[y * L.w + x] = L.rows[y].charAt(x) === 'T' ? 1 : 0;
+      }
+    }
+    var teal = 0;
+    for (var i = 0; i < n; i++) teal += board[i];
+    return {
+      index: index, L: L, n: n, size: n / L.k, board: board,
+      teal: teal, amber: n - teal,
+      order: [], assign: new Int8Array(n).fill(-1),
+      districts: [], current: 0,
+      moves: 0, hints: 0, cursor: 0, finished: false, cells: []
+    };
+  }
+
+  function neighbours(i) {
+    var W = G.L.w, H = G.L.h;
+    var x = i % W, y = (i / W) | 0;
+    var out = [];
+    if (y > 0) out.push(i - W);
+    if (y < H - 1) out.push(i + W);
+    if (x > 0) out.push(i - 1);
+    if (x < W - 1) out.push(i + 1);
+    return out;
+  }
+
+  // Recompute derived state straight from the placement order.
+  // Districts are exact-size by construction because a district closes
+  // the instant it reaches `size`.
+  function rebuild() {
+    G.assign.fill(-1);
+    G.districts = [];
+    for (var d = 0; d < G.L.k; d++) G.districts.push([]);
+    var cur = 0;
+    for (var j = 0; j < G.order.length; j++) {
+      var i = G.order[j];
+      G.assign[i] = cur;
+      G.districts[cur].push(i);
+      if (G.districts[cur].length === G.size) cur++;
+    }
+    G.current = cur;
+  }
+
+  function districtTally(d) {
+    var cells = G.districts[d], t = 0;
+    for (var j = 0; j < cells.length; j++) t += G.board[cells[j]];
+    return { t: t, a: cells.length - t, filled: cells.length };
+  }
+
+  function districtWinner(d) {
+    var q = districtTally(d);
+    if (q.filled < G.size) return 'part';
+    if (q.t > q.a) return 'teal';
+    if (q.a > q.t) return 'amber';
+    return 'tie';
+  }
+
+  function seatCount() {
+    var s = { teal: 0, amber: 0, tie: 0 };
+    for (var d = 0; d < G.L.k; d++) {
+      var w = districtWinner(d);
+      if (w === 'teal') s.teal++;
+      else if (w === 'amber') s.amber++;
+      else if (w === 'tie') s.tie++;
+    }
+    return s;
+  }
+
+  function buildGrid() {
+    var L = G.L;
+    grid.innerHTML = '';
+    grid.style.setProperty('--cols', String(L.w));
+    grid.setAttribute('aria-rowcount', String(L.h));
+    grid.setAttribute('aria-colcount', String(L.w));
+    G.cells = [];
+    for (var y = 0; y < L.h; y++) {
+      var row = document.createElement('div');
+      row.className = 'row';
+      row.setAttribute('role', 'row');
+      for (var x = 0; x < L.w; x++) {
+        var i = y * L.w + x;
+        var c = document.createElement('div');
+        c.className = 'cell';
+        c.id = 'c' + i;
+        c.setAttribute('role', 'gridcell');
+        c.setAttribute('data-i', String(i));
+        var badge = document.createElement('span');
+        badge.className = 'badge';
+        badge.hidden = true;
+        var mark = document.createElement('span');
+        mark.className = 'mark ' + (G.board[i] ? 't' : 'a');
+        c.appendChild(badge);
+        c.appendChild(mark);
+        row.appendChild(c);
+        G.cells.push({ el: c, badge: badge });
+      }
+      grid.appendChild(row);
+    }
+  }
+
+  function sides(i, d) {
+    var W = G.L.w, H = G.L.h;
+    var x = i % W, y = (i / W) | 0;
+    return {
+      up: (y > 0 ? G.assign[i - W] : -9) === d,
+      dn: (y < H - 1 ? G.assign[i + W] : -9) === d,
+      lf: (x > 0 ? G.assign[i - 1] : -9) === d,
+      rt: (x < W - 1 ? G.assign[i + 1] : -9) === d
+    };
+  }
+
+  function edgeShadow(i, d, s) {
+    var col = (d === G.current) ? 'var(--line-hot)' : 'var(--line)';
+    var parts = [];
+    if (!s.up) parts.push('inset 0 ' + BW + 'px 0 0 ' + col);
+    if (!s.dn) parts.push('inset 0 -' + BW + 'px 0 0 ' + col);
+    if (!s.lf) parts.push('inset ' + BW + 'px 0 0 0 ' + col);
+    if (!s.rt) parts.push('inset -' + BW + 'px 0 0 0 ' + col);
+    return parts.join(',');
+  }
+
+  // Round a corner only where the district actually turns, so a run of cells
+  // reads as one rounded region instead of a row of separate tiles.
+  function cornerRadii(s) {
+    var R = 'var(--radius-sm)';
+    return [
+      (!s.up && !s.lf) ? R : '2px',
+      (!s.up && !s.rt) ? R : '2px',
+      (!s.dn && !s.rt) ? R : '2px',
+      (!s.dn && !s.lf) ? R : '2px'
+    ].join(' ');
+  }
+
+  var kbActive = false;
+
+  function paint() {
+    if (!G) return;
+    var L = G.L, i, d;
+
+    for (i = 0; i < G.n; i++) {
+      var rec = G.cells[i];
+      var el = rec.el;
+      d = G.assign[i];
+      var cls = 'cell';
+      if (d !== -1) cls += ' assigned';
+      if (d !== -1 && d === G.current) cls += ' hot';
+      if (i === G.cursor) cls += ' cursor';
+      if (el.classList.contains('refused')) cls += ' refused';
+      el.className = cls;
+      if (d === -1) {
+        el.style.boxShadow = '';
+        el.style.borderRadius = '';
+      } else {
+        var s = sides(i, d);
+        el.style.boxShadow = edgeShadow(i, d, s);
+        el.style.borderRadius = cornerRadii(s);
+      }
+
+      var x = i % L.w, y = (i / L.w) | 0;
+      var lab = 'Row ' + (y + 1) + ', column ' + (x + 1) + ', ' +
+        (G.board[i] ? 'Teal' : 'Amber') + ' voter, ' +
+        (d === -1 ? 'unassigned' : 'district ' + (d + 1));
+      el.setAttribute('aria-label', lab);
+      rec.badge.hidden = true;
+    }
+
+    for (d = 0; d < L.k; d++) {
+      var cells = G.districts[d];
+      if (!cells.length) continue;
+      var q = districtTally(d);
+      var anchor = G.cells[cells[0]].badge;
+      var w = districtWinner(d);
+      anchor.hidden = false;
+      anchor.textContent = q.t + '–' + q.a;
+      anchor.className = 'badge' + (w === 'teal' ? ' win-t' : w === 'amber' ? ' win-a' : w === 'tie' ? ' tie' : '');
+    }
+
+    grid.setAttribute('aria-activedescendant', 'c' + G.cursor);
+    grid.className = 'grid' + (kbActive ? ' kb' : '');
+
+    paintStatus();
+    paintChips();
+  }
+
+  function paintStatus() {
+    var L = G.L;
+    var done = G.current >= L.k;
+    var left = done ? 0 : G.size - G.districts[G.current].length;
+    $('st-district').textContent = done ? ('—/' + L.k) : ((G.current + 1) + '/' + L.k);
+    $('st-left').textContent = String(left);
+    $('st-remaining').textContent = String(Math.max(0, L.k - G.current));
+    $('st-moves').textContent = String(G.moves);
+    var s = seatCount();
+    $('st-seat-t').textContent = String(s.teal);
+    $('st-seat-a').textContent = String(s.amber);
+    $('st-seat-x').textContent = String(s.tie);
+    var b = progress.best[String(L.id)];
+    $('st-best').textContent = b ? String(b) : '—';
+    $('st-hints').textContent = String(G.hints);
+    $('btn-undo').disabled = G.order.length === 0;
+    $('btn-clear').disabled = G.order.length === 0;
+  }
+
+  function paintChips() {
+    var L = G.L;
+    var html = '';
+    for (var d = 0; d < L.k; d++) {
+      var q = districtTally(d);
+      var w = districtWinner(d);
+      var cls = 'chip';
+      if (w === 'teal') cls += ' win-t';
+      else if (w === 'amber') cls += ' win-a';
+      else if (w === 'tie') cls += ' tie';
+      if (d === G.current) cls += ' active';
+      var body = q.filled === 0 ? '–' : (q.t + '–' + q.a);
+      html += '<span class="' + cls + '">' + (d + 1) + ' <b>' + body + '</b></span>';
+    }
+    chipsEl.innerHTML = html;
+  }
+
+  var dragging = false;
+  var sweeping = false;
+  var dragPointer = null;
+  var lastCell = -1;
+
+  // A sweep across taken cells would otherwise fire one announcement per cell.
+  function refuse(i, msg) {
+    var el = G.cells[i].el;
+    el.classList.add('refused');
+    window.setTimeout(function () { el.classList.remove('refused'); }, 420);
+    if (!sweeping) announce(msg);
+  }
+
+  function tryPlace(i) {
+    if (!G || G.finished) return false;
+    if (i < 0 || i >= G.n) return false;
+
+    if (G.current >= G.L.k) {
+      refuse(i, 'Every cell is already assigned. Undo or clear to redraw.');
+      return false;
+    }
+    if (G.assign[i] !== -1) {
+      refuse(i, 'That cell is already in district ' + (G.assign[i] + 1) + '.');
+      return false;
+    }
+    var d = G.current;
+    if (G.districts[d].length > 0) {
+      var ok = false, nb = neighbours(i);
+      for (var j = 0; j < nb.length; j++) {
+        if (G.assign[nb[j]] === d) { ok = true; break; }
+      }
+      if (!ok) {
+        refuse(i, 'That cell does not touch district ' + (d + 1) + '. Districts must stay joined.');
+        return false;
+      }
+    }
+
+    G.order.push(i);
+    G.moves++;
+    rebuild();
+    G.cursor = i;
+
+    var completed = (G.assign[i] === d && G.districts[d].length === G.size);
+    paint();
+
+    if (completed) {
+      var q = districtTally(d);
+      var w = districtWinner(d);
+      var verdict = w === 'teal' ? 'Teal takes the seat.' :
+        w === 'amber' ? 'Amber takes the seat.' :
+        'Even split — tied, and it counts for nobody.';
+      announce('District ' + (d + 1) + ' closed: Teal ' + q.t + ', Amber ' + q.a + '. ' + verdict +
+        (G.current < G.L.k ? ' District ' + (G.current + 1) + ' is now open.' : ''));
+    }
+
+    if (G.order.length === G.n) finishLevel();
+    return true;
+  }
+
+  function undo() {
+    if (!G || !G.order.length) { announce('Nothing to undo.'); return; }
+    var i = G.order.pop();
+    rebuild();
+    G.finished = false;
+    closeOverlay();
+    G.cursor = i;
+    paint();
+    var left = G.size - G.districts[G.current].length;
+    announce('Removed the last cell. District ' + (G.current + 1) + ' is open with ' +
+      left + (left === 1 ? ' cell' : ' cells') + ' to fill.');
+  }
+
+  function clearBoard() {
+    if (!G) return;
+    if (!G.order.length) { announce('The board is already empty.'); return; }
+    G.order = [];
+    rebuild();
+    G.finished = false;
+    closeOverlay();
+    paint();
+    announce('Board cleared. District 1 is open.');
+  }
+
+  function barMarkup(tealVal, amberVal, tieVal, tealLab, amberLab, tieLab) {
+    var total = tealVal + amberVal + tieVal;
+    if (total <= 0) total = 1;
+    var out = '';
+    if (tealVal > 0) out += '<span class="b-t" style="flex:' + tealVal + ' 1 0">' + tealLab + '</span>';
+    if (tieVal > 0) out += '<span class="b-x" style="flex:' + tieVal + ' 1 0">' + tieLab + '</span>';
+    if (amberVal > 0) out += '<span class="b-a" style="flex:' + amberVal + ' 1 0">' + amberLab + '</span>';
+    return '<div class="bar">' + out + '</div>';
+  }
+
+  function voteLine() {
+    return G.amber >= G.teal
+      ? 'Amber ' + G.amber + ' voters, Teal ' + G.teal
+      : 'Teal ' + G.teal + ' voters, Amber ' + G.amber;
+  }
+
+  function compareMarkup(s) {
+    var votes = '<div class="cmp-row"><div class="lab"><span>Popular vote</span><span>' +
+      G.teal + ' Teal · ' + G.amber + ' Amber</span></div>' +
+      barMarkup(G.teal, G.amber, 0, 'Teal ' + G.teal, 'Amber ' + G.amber, '') + '</div>';
+    var seats = '<div class="cmp-row"><div class="lab"><span>Seats on the council</span><span>' +
+      s.teal + ' Teal · ' + s.tie + ' tied · ' + s.amber + ' Amber</span></div>' +
+      barMarkup(s.teal, s.amber, s.tie, 'Teal ' + s.teal, 'Amber ' + s.amber, s.tie + ' tied') + '</div>';
+    return votes + seats;
+  }
+
+  function finishLevel() {
+    var s = seatCount();
+    G.finished = true;
+    paint();
+    var won = s.teal > s.amber;
+    var L = G.L;
+
+    if (won) {
+      var key = String(L.id);
+      var prev = progress.best[key];
+      var isBest = !prev || G.moves < prev;
+      if (isBest) progress.best[key] = G.moves;
+      progress.res[key] = [s.teal, s.amber, s.tie];
+      if (G.index + 1 < LEVELS.length && progress.unlocked < G.index + 1) {
+        progress.unlocked = G.index + 1;
+      }
+      Store.commit();
+
+      $('solved-line').textContent =
+        voteLine() + ' — Teal takes the council ' +
+        s.teal + '–' + s.amber + (s.tie ? ' with ' + s.tie + ' tied' : '') + '.';
+      $('solved-compare').innerHTML = compareMarkup(s);
+      $('solved-moves').textContent = String(G.moves);
+      $('solved-best').textContent = String(progress.best[key]);
+      $('solved-hints').textContent = String(G.hints);
+      $('solved-note').textContent = isBest
+        ? 'New best for this level. A perfect run places every cell once: ' + G.n + ' moves.'
+        : 'Your best here is ' + progress.best[key] + ' moves. A perfect run is ' + G.n + '.';
+
+      var lastLevel = G.index + 1 >= LEVELS.length;
+      var nextBtn = $('btn-next');
+      nextBtn.textContent = lastLevel ? 'See the ending' : 'Next level';
+      $('solved-title').textContent = lastLevel ? 'Final level passed' : 'Level passed';
+
+      announce('Level passed. ' + $('solved-line').textContent);
+      openOverlay('solved');
+    } else {
+      var why;
+      if (s.teal === s.amber && s.tie > 0) {
+        why = 'Teal and Amber finished on ' + s.teal + ' seat' + (s.teal === 1 ? '' : 's') +
+          ' each, and ' + s.tie + ' district' + (s.tie === 1 ? ' was' : 's were') +
+          ' split evenly. A tie counts for nobody, so those seats are simply gone — and Teal needs strictly more districts than Amber, not the same number.';
+      } else if (s.teal === s.amber) {
+        why = 'Level on seats, ' + s.teal + ' each. Teal needs strictly more districts than Amber — a draw is not a pass.';
+      } else {
+        why = 'Amber took ' + s.amber + ' district' + (s.amber === 1 ? '' : 's') + ' to Teal’s ' + s.teal +
+          (s.tie ? ', with ' + s.tie + ' tied and counting for nobody' : '') +
+          '. Teal’s votes were spread too thin: a district won by every cell is worth exactly as much as one won by a single voter.';
+      }
+      $('failed-line').textContent =
+        voteLine() + ' — ' +
+        (s.amber > s.teal
+          ? 'Amber takes the council ' + s.amber + '–' + s.teal
+          : 'the council is level ' + s.teal + '–' + s.amber) +
+        (s.tie ? ' with ' + s.tie + ' tied' : '') + '.';
+      $('failed-compare').innerHTML = compareMarkup(s);
+      $('failed-why').textContent = why;
+      announce('Board full. Teal did not win. ' + why);
+      openOverlay('failed');
+    }
+  }
+
+  function levelTeal(L) {
+    var t = 0;
+    for (var y = 0; y < L.h; y++) {
+      for (var x = 0; x < L.w; x++) if (L.rows[y].charAt(x) === 'T') t++;
+    }
+    return t;
+  }
+
+  function showComplete() {
+    var votesT = 0, votesA = 0, seatsT = 0, seatsA = 0, seatsX = 0, moves = 0, counted = 0;
+    for (var i = 0; i < LEVELS.length; i++) {
+      var L = LEVELS[i];
+      var key = String(L.id);
+      var r = progress.res[key];
+      if (!r) continue;
+      counted++;
+      var t = levelTeal(L);
+      votesT += t;
+      votesA += L.w * L.h - t;
+      seatsT += r[0]; seatsA += r[1]; seatsX += r[2];
+      var b = progress.best[key];
+      if (b) moves += b;
+    }
+    $('cmp-count').textContent = counted === LEVELS.length ? 'all five maps' : (counted + ' of the maps');
+    $('cmp-votes').textContent = String(votesT);
+    $('cmp-votes-a').textContent = String(votesA);
+    $('cmp-seats').textContent = String(seatsT);
+    $('cmp-seats-a').textContent = String(seatsA);
+    $('cmp-tied').textContent = seatsX ? (', with ' + seatsX + ' seat' + (seatsX === 1 ? '' : 's') + ' tied and taken by nobody') : '';
+    $('cmp-moves').textContent = moves ? String(moves) : '—';
+    $('cmp-hints').textContent = String(sessionHints);
+    openOverlay('complete');
+  }
+
+  function startLevel(index) {
+    if (index < 0 || index >= LEVELS.length) return;
+    G = buildLevelState(index);
+    rebuild();
+    buildGrid();
+    var L = G.L;
+    $('play-lv').textContent = 'Level ' + (index + 1) + ' of ' + LEVELS.length;
+    $('play-nm').textContent = L.name;
+    hintbox.hidden = true;
+    hintbox.textContent = '';
+    kbActive = false;
+    showScreen('play');
+    paint();
+    announce(L.name + '. ' + L.blurb + ' ' + L.w + ' by ' + L.h + ' grid, ' + L.k +
+      ' districts of ' + G.size + ' cells. Teal ' + G.teal + ', Amber ' + G.amber + '.');
+  }
+
+  function renderLevels() {
+    var list = $('level-list');
+    list.innerHTML = '';
+    for (var i = 0; i < LEVELS.length; i++) {
+      (function (idx) {
+        var L = LEVELS[idx];
+        var locked = idx > progress.unlocked;
+        var best = progress.best[String(L.id)];
+        var btn = document.createElement('button');
+        btn.className = 'levelcard';
+        btn.setAttribute('data-locked', locked ? '1' : '0');
+        btn.setAttribute('data-solved', best ? '1' : '0');
+        btn.disabled = locked;
+        var n = L.w * L.h;
+        var teal = levelTeal(L);
+        btn.innerHTML =
+          '<span class="idx">' + (locked ? '\u{1F512}' : (best ? '✓' : (idx + 1))) + '</span>' +
+          '<span class="meta"><span class="nm">' + L.name + '</span>' +
+          '<span class="sub">' + L.w + '×' + L.h + ' · ' + L.k + ' districts of ' + (n / L.k) +
+          ' · Teal ' + teal + '/' + n + '</span></span>' +
+          '<span class="score">Best<b>' + (best ? best : '—') + '</b></span>';
+        btn.setAttribute('aria-label',
+          (locked ? 'Locked. ' : '') + 'Level ' + (idx + 1) + ', ' + L.name + '. ' +
+          L.w + ' by ' + L.h + ', ' + L.k + ' districts. ' +
+          (best ? 'Best ' + best + ' moves.' : 'Never completed.'));
+        btn.addEventListener('click', function () {
+          if (locked) return;
+          startLevel(idx);
+        });
+        list.appendChild(btn);
+      })(i);
+    }
+    $('levels-note').textContent = Store.persistent()
+      ? 'Levels unlock in order. Best scores are saved on this device.'
+      : 'Levels unlock in order. This browser is not letting the game save — progress lasts for this session only.';
+  }
+
+  function cellIndexFromPoint(x, y) {
+    var el = document.elementFromPoint(x, y);
+    if (!el) return -1;
+    var cell = el.closest ? el.closest('.cell') : null;
+    if (!cell || !grid.contains(cell)) return -1;
+    var v = parseInt(cell.getAttribute('data-i'), 10);
+    return isFinite(v) ? v : -1;
+  }
+
+  function endDrag() {
+    if (!dragging) return;
+    dragging = false;
+    sweeping = false;
+    lastCell = -1;
+    if (dragPointer !== null) {
+      try {
+        if (grid.hasPointerCapture && grid.hasPointerCapture(dragPointer)) {
+          grid.releasePointerCapture(dragPointer);
+        }
+      } catch (e) { /* capture already gone */ }
+    }
+    dragPointer = null;
+  }
+
+  grid.addEventListener('pointerdown', function (e) {
+    if (!G || G.finished || !overlay.hidden) return;
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
+    var i = cellIndexFromPoint(e.clientX, e.clientY);
+    if (i < 0) return;
+    e.preventDefault();
+    kbActive = false;
+    dragging = true;
+    sweeping = false;
+    dragPointer = e.pointerId;
+    try { grid.setPointerCapture(e.pointerId); } catch (err) { /* not supported */ }
+    lastCell = i;
+    tryPlace(i);
+  });
+
+  grid.addEventListener('pointermove', function (e) {
+    if (!dragging || e.pointerId !== dragPointer) return;
+    if (!G || G.finished || !overlay.hidden) { endDrag(); return; }
+    var i = cellIndexFromPoint(e.clientX, e.clientY);
+    if (i < 0 || i === lastCell) return;
+    lastCell = i;
+    sweeping = true;
+    if (G.assign[i] !== -1) return;
+    tryPlace(i);
+  });
+
+  grid.addEventListener('pointerup', endDrag);
+  grid.addEventListener('pointercancel', endDrag);
+  grid.addEventListener('lostpointercapture', endDrag);
+  window.addEventListener('pointerup', endDrag);
+  window.addEventListener('pointercancel', endDrag);
+  window.addEventListener('blur', endDrag);
+  grid.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+  grid.addEventListener('dragstart', function (e) { e.preventDefault(); });
+
+  grid.addEventListener('keydown', function (e) {
+    if (!G || !overlay.hidden) return;
+    var L = G.L, x = G.cursor % L.w, y = (G.cursor / L.w) | 0, moved = true;
+    switch (e.key) {
+      case 'ArrowUp': y = Math.max(0, y - 1); break;
+      case 'ArrowDown': y = Math.min(L.h - 1, y + 1); break;
+      case 'ArrowLeft': x = Math.max(0, x - 1); break;
+      case 'ArrowRight': x = Math.min(L.w - 1, x + 1); break;
+      case 'Home': x = 0; break;
+      case 'End': x = L.w - 1; break;
+      case 'Enter':
+      case ' ':
+      case 'Spacebar':
+        e.preventDefault();
+        kbActive = true;
+        tryPlace(G.cursor);
+        return;
+      default: moved = false;
+    }
+    if (!moved) return;
+    e.preventDefault();
+    kbActive = true;
+    G.cursor = y * L.w + x;
+    paint();
+    var d = G.assign[G.cursor];
+    announce('Row ' + (y + 1) + ', column ' + (x + 1) + ', ' +
+      (G.board[G.cursor] ? 'Teal' : 'Amber') + ', ' +
+      (d === -1 ? 'free' : 'district ' + (d + 1)) + '.');
+  });
+
+  grid.addEventListener('focus', function () { paint(); });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      if (!overlay.hidden) {
+        if (openPanel === 'paused') { e.preventDefault(); closeOverlay(); }
+        return;
+      }
+      if (currentScreen === 'play' && G && !G.finished) {
+        e.preventDefault();
+        pauseGame();
+      } else if (currentScreen === 'howto' || currentScreen === 'levels') {
+        e.preventDefault();
+        showScreen('title');
+      }
+      return;
+    }
+    if (currentScreen !== 'play' || !overlay.hidden || !G) return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    var k = e.key.toLowerCase();
+    if (k === 'u') { e.preventDefault(); undo(); }
+    else if (k === 'r') { e.preventDefault(); clearBoard(); }
+    else if (k === 'h') { e.preventDefault(); giveHint(); }
+  });
+
+  function giveHint() {
+    if (!G) return;
+    G.hints++;
+    sessionHints++;
+    hintbox.hidden = false;
+    hintbox.textContent = 'Hint ' + G.hints + ': ' + G.L.hint;
+    paintStatus();
+    announce('Hint: ' + G.L.hint);
+  }
+
+  function pauseGame() {
+    if (!G || G.finished) return;
+    endDrag();
+    openOverlay('paused');
+  }
+
+  function firstPlayable() {
+    for (var i = 0; i < LEVELS.length; i++) {
+      if (i > progress.unlocked) break;
+      if (!progress.best[String(LEVELS[i].id)]) return i;
+    }
+    return Math.min(progress.unlocked, LEVELS.length - 1);
+  }
+
+  $('btn-play').addEventListener('click', function () {
+    if (!progress.seen) {
+      progress.seen = 1;
+      Store.commit();
+      showScreen('howto');
+      return;
+    }
+    startLevel(firstPlayable());
+  });
+  $('btn-howto').addEventListener('click', function () { showScreen('howto'); });
+  $('btn-levels').addEventListener('click', function () { renderLevels(); showScreen('levels'); });
+  $('btn-howto-back').addEventListener('click', function () { showScreen('title'); });
+  $('btn-howto-play').addEventListener('click', function () {
+    progress.seen = 1; Store.commit();
+    startLevel(firstPlayable());
+  });
+  $('btn-levels-back').addEventListener('click', function () { showScreen('title'); });
+
+  $('btn-pause').addEventListener('click', pauseGame);
+  $('btn-undo').addEventListener('click', function () { undo(); });
+  $('btn-clear').addEventListener('click', function () { clearBoard(); });
+  $('btn-hint').addEventListener('click', giveHint);
+
+  $('btn-resume').addEventListener('click', function () {
+    closeOverlay();
+    grid.focus();
+  });
+  $('btn-restart').addEventListener('click', function () { startLevel(G.index); });
+  $('btn-to-levels').addEventListener('click', function () { renderLevels(); showScreen('levels'); });
+  $('btn-to-title').addEventListener('click', function () { showScreen('title'); });
+
+  $('btn-next').addEventListener('click', function () {
+    if (G.index + 1 < LEVELS.length) startLevel(G.index + 1);
+    else { closeOverlay(); showComplete(); }
+  });
+  $('btn-retry-solved').addEventListener('click', function () { startLevel(G.index); });
+  $('btn-levels-solved').addEventListener('click', function () { renderLevels(); showScreen('levels'); });
+  $('btn-retry-failed').addEventListener('click', function () { startLevel(G.index); });
+  $('btn-levels-failed').addEventListener('click', function () { renderLevels(); showScreen('levels'); });
+  $('btn-complete-levels').addEventListener('click', function () { renderLevels(); showScreen('levels'); });
+  $('btn-complete-title').addEventListener('click', function () { showScreen('title'); });
+
+  // Nothing to restore mid-board: the title screen is always the entry point.
+  showScreen('title');
+})();
+</script>
+</body>
+</html>

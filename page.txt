@@ -1,0 +1,95 @@
+ 
+ SUMMER CODING CHALLENGE 2026 - Pracuj pro Silicon ValleyPracuj pro Silicon Valley 
+ -->
+ Pracuj pro Silicon Valley 
+ profiq 
+ proč profiq 
+ Proces náboru 
+ Blog 
+ student pool 
+ Volné pozice 
+ Pracuj pro Silicon Valley Blog SUMMER CODING CHALLENGE 2026 
+ SUMMER CODING CHALLENGE 2026
+ před 3 týdny • Civilní život • For techies 
+ Letošní soutěž Summer Coding Challenge 2026 prověří tvou schopnost vytvořit webovou aplikaci jedním promptem .
+ Téma – MINIHRA 
+ soutěž probíhá do 7. září 2026
+ výsledky budou vyhlášeny nejpozději 23. září 2026
+ účastníkem se může stát každý, komu je minimálně 18 let. 
+ Odměnou pro vítěze jsou peněžní ceny:
+ místo: 7 000 Kč
+ místo: 5 000 Kč
+ místo: 3 000 Kč
+ ZADÁNÍ ÚKOLU 
+ Myslíš si, že AI zvládne naprogramovat skvělou minihru z jediného promptu? Tak nám to dokaž.
+ Tvým úkolem je vytvořit jeden prompt , který po spuštění v připraveném AI coding agentovi vygeneruje kompletní funkční aplikaci (hru) . Jakmile generování začne, už nesmí přijít žádný další lidský zásah . Žádné doplňující prompty, žádné ruční úpravy.
+ Výsledkem musí být jediný soubor index.html , který se otevře v běžném prohlížeči bez instalace, buildu nebo serveru.
+ Co aplikace musí splňovat :
+ 🎯 Odpovídat tématu Minihra
+ 🌐 Spustit se v běžném prohlížeči bez chyb a další konfigurace
+ 📄 Celá aplikace je obsažená v jediném souboru index.html
+ Na co se zaměří porota :
+ Funkčnost 
+ Jak si aplikace poradí s prázdnými stavy, chybnými vstupy nebo edge cases.
+ UX & Design 
+ Je intuitivní, responzivní a příjemná na používání? Funguje všechno tak, jak má?
+ Originalita 
+ Přijdeš s nápadem, který ostatní nenapadl?
+ Kvalita promptu 
+ Jak promyšleně a úsporně je napsaný?
+ Pravidla soutěže: 
+ Účastník odevzdá jeden prompt o délce nejvýše 10 000 znaků.
+ Prompt nesmí obsahovat podstatnou část hotového zdrojového kódu ani zakódované assety.
+ Generování má celkový limit 60 minut.
+ Po spuštění promptu nesmí člověk odpovídat agentovi, doplňovat další prompty ani upravovat soubory.
+Příprava a ladění promptu může probíhat bez omezení.
+ Agent smí v rámci jediného běhu autonomně plánovat, testovat výsledek a opravovat chyby.
+ Aplikace musí zůstat v jednom index.html a spustitelná bez dalších závislostí.
+ Co odevzdáš: 
+ přesné znění promptu v souboru prompt.md 
+ název AI agenta, použitý tooling, verzi modelu a případné další nastavení
+ vygenerovaný (a ručně neupravený) index.html
+ krátký popis aplikace a její funkcionality
+ Mrkni, co už vzniklo
+ Jeden prompt. Žádné další úpravy. Podívej se na minihry, které už v rámci letošní Summer Coding Challenge vznikly.
+ BLASTMAN
+ Zahrát si → 
+ LEAP
+ Zahrát si → 
+ HODNOCENÍ 
+ Jak proběhne ověření: 
+ Otevřeme odevzdanou aplikaci v čistém profilu prohlížeče a ověříme dodanou funkcionalitu
+ Organizátor jednou spustí stejný prompt. Výstup nemusí být identický, ale musí znovu vytvořit spustitelnou aplikaci se stejnými klíčovými funkcemi.
+ Porota hodnotí řešení samostatně podle zveřejněného hodnocení pro každou z oblastí známkou 1-5, známky jsou následně přepočteny pomocí váhy níže.
+ Výhra náleží třem soutěžícím s nejvyšším počtem bodů.
+ V každé oblasti můžeš získat body 1-5, každá oblast má ve výsledném hodnocení jinou váhu podle následující tabulky:
+ 25 % – dodržení tématu a spustitelnost aplikace
+ 25 % – originialita nápadu
+ 20 % – UX, design a použitelnost
+ 20 % – kvalita promptu
+ 10 % – opakovatelnost při ověřovacím běhu
+ Podrobná pravidla a podmínky soutěžě najdeš zde .
+ Správné řešení nám i se svými kontakty pošli nejpozději do 7. 9. 2026 přes tento formulář .
+ A pokud tě láká dlouhodobá spolupráce na zajímavých projektech, přihlas se také do našeho student poolu . Otevíráme dveře studentům, kteří se chtějí zapojit do reálných vývojářských týmů. 
+ život v profiqu
+ GAME DAY – FORZA HORIZON 5 TURNAJ
+ Podrobnosti 
+ Nové vedení Engineeringu ve společnosti profiq
+ Podrobnosti 
+ Grill Party
+ Podrobnosti 
+ IT akce Ostrava
+ Podrobnosti 
+ O webu
+ Příběhy
+ O Valley
+ Doporuč kamaráda
+ Sledujte nás!
+ Facebook 
+ LinkedIn 
+ Twitter 
+ YouTube 
+ Atmoskop 
+ Copyright 2026 © Pracuj pro Silicon Valley . Všechna práva vyhrazena. Zásady ochrany osobních údajů. 
+ Nahoru 
+ 
