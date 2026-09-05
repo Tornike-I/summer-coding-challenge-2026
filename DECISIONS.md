@@ -64,3 +64,25 @@ in parallel against one browser.
 **Decision:** for the remaining judging, instruct judges to score from the file and screenshots only,
 without driving the browser. That costs some behavioural verification, which the automated validator
 already covers, and buys back real isolation.
+
+## 2026-09-05 13:25 — D12. Paradox Loop's prompt was revised before attempt three
+Two attempts produced no build, so nothing was ever judged under the original text and no comparison
+is lost by changing it. Rather than burn a third identical attempt I folded in the round-1 findings,
+all of which came from judges or from the failed run itself — not from me guessing:
+- **"Prove the exit is not reachable while ignoring the doors."** The run-2 agent found this exact bug
+  in its own generated levels ("levels 3 and 4 had connectivity leaks") before it died. A solver
+  reports such a level solvable; it is still broken. This is the single most valuable line added.
+- **A wide-screen layout requirement.** Both Districts judges called out a phone-shaped column adrift
+  at 1440px as the weakest thing about an otherwise polished build.
+- **Modal focus trapping.** The Districts judge found `aria-modal` overlays that neither trap Tab nor
+  make the background inert — the only accessibility hole in a careful build.
+- **Section 8 trimmed** to the lines it does not already state elsewhere, since all four judges docked
+  prompt quality for the checklist restating sections 5–7.
+`candidates/r1-paradox-loop/prompt.md` now holds the exact text that was run, and the directory keeps
+its `r1-` name only because the running agents write into it — treat it as a round-2 prompt.
+
+## 2026-09-05 13:25 — D13. Districts is dropped, Bloom gets an isolated economy pass
+Round 1 put both at 4.25–4.35 with originality pinned at 4 by four independent judges. Districts'
+ceiling is the harder of the two — two judges said it adds nothing on top of a known concept and the
+back half is the same insight at larger scale — so per the brief it is dropped rather than polished.
+Bloom gets exactly one change, the economy cut, so any movement in prompt quality is attributable.

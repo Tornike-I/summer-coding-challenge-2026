@@ -44,6 +44,10 @@ when **you** — never a ghost — stand on an open exit.
 solver or search in your head, play each one through, and adjust the layout or the limits until it works.
 Do not ship a level you have not solved. Delete any scratch files afterwards.
 
+**Also prove every level actually requires what it teaches**: check that the exit is *not* reachable while
+ignoring the doors. A level whose exit can be walked to without ever opening a door is a broken level, even
+though a solver will happily report it solvable.
+
 ## 3. Controls
 
 Arrow keys or WASD to move, Space to wait, Enter to Rewind, Backspace to restart the level, Esc for the
@@ -84,9 +88,12 @@ ramp. Motion is short and purposeful.
 
 - Responsive from 320px to 1920px. The board scales to fit; **never any horizontal scrolling**, and on a
   375×667 phone the whole game — board, status bar and controls — fits without the page scrolling.
+  On a wide screen do not leave the game as a narrow phone-shaped column: give it a layout that uses the
+  width, with the board beside the status and controls.
 - Respect `prefers-reduced-motion: reduce`: drop every transition and animation, keep every state change.
 - Real `<button>` elements, visible focus outlines, sensible labels, and an ARIA live region that announces
-  turn refusals, rewinds, wins and losses.
+  turn refusals, rewinds, wins and losses. Any modal must trap Tab inside itself and leave the background
+  out of the tab order.
 
 ## 7. Verify before you declare it finished
 
@@ -96,7 +103,7 @@ of these and fix what you find:
 
 1. First ever load, empty storage: no `undefined`, no `NaN`, no empty boxes on screen.
 2. Every screen in section 4 reachable, and every button on it does something.
-3. Each of the six levels completed within its par.
+3. Each of the six levels completed within its par, and none solvable while ignoring the doors.
 4. Refused moves: walk into a wall, a shut door and a ghost — turn counter must not move.
 5. Rewind on turn 0; rewind with zero loops left; restart mid-loop; pause and resume mid-loop.
 6. Hammer the keys during any animation — the state must not desynchronise or double-step.
@@ -106,7 +113,7 @@ of these and fix what you find:
 
 ## 8. Final checklist — tick every line, fix anything unticked, then stop
 
-☐ one file `index.html`, nothing else in the directory ☐ no `http`/`https` reference anywhere ☐ no modules
-☐ opens from `file://` with an empty console ☐ all six levels solvable and solved ☐ ghosts replay
-faithfully and wait when blocked ☐ every screen and button works ☐ storage failure is survivable
-☐ no horizontal scroll at 320px ☐ reduced motion respected ☐ keyboard and touch both complete
+☐ one file `index.html`, nothing else in the directory ☐ opens from `file://` with an empty console
+☐ all six levels solved, and none of them solvable with the doors ignored ☐ ghosts replay faithfully and
+wait when blocked ☐ every screen and button works ☐ storage failure is survivable ☐ no horizontal scroll
+at 320px and no wasted column at 1440px ☐ reduced motion respected ☐ keyboard and touch both complete
