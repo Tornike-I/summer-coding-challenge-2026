@@ -25,7 +25,9 @@ Puzzle golf on a cellular automaton: two lines of rules, and a solution space no
   Pause holds. Reset returns to your planting with the seeds intact, so you can adjust one cell rather
   than start over — one click, and it matters.
 - **Winning.** The instant one generation has every bud alive at once, freeze the board and celebrate.
-  Extra live cells elsewhere are fine.
+  Extra live cells elsewhere are fine. **The check starts at generation 1**, after Grow has run at
+  least one step — planting straight onto the buds and declaring victory is not a solution, and
+  without this every level with more seeds than buds has a degenerate answer.
 - **Losing.** The limit passes without that happening. Never just say "failed" — report the best moment
   ("best: 3 of 4 buds, at generation 11") and offer Retry with the seeds still in place.
 - **Score.** Seeds used and generations taken, fewer better, with a per-level best.

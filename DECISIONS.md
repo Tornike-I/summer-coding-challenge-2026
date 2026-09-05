@@ -115,3 +115,11 @@ is occupied" versus a level brief demanding two plates and two ghosts). In both 
 faithfully implemented the contradiction, and in Paradox Loop's case it cost a whole level.
 **Before any prompt ships, read the rules section against the level list and confirm both can be true
 at once.** Applied to `r2-bloom` before its first run.
+
+## 2026-09-05 21:45 — D17. D16's check immediately found a hole in r2-bloom
+Reading Bloom's rules against its level list: the win condition said *"the instant one generation has
+every bud alive at once"* without saying when counting starts. Generation 0 is the planting itself, so
+**any level with at least as many seeds as buds could be won by planting straight onto the buds** —
+level 1 (three buds, five seeds) most obviously, which would have taught nothing. The prompt now
+checks from generation 1 onward, which also makes level 1 exactly the blinker lesson it was meant to
+be: plant the blinker rotated, let one step turn it into the row. Found before a single run was spent.
