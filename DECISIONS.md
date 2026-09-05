@@ -86,3 +86,14 @@ Round 1 put both at 4.25–4.35 with originality pinned at 4 by four independent
 ceiling is the harder of the two — two judges said it adds nothing on top of a known concept and the
 back half is the same insight at larger scale — so per the brief it is dropped rather than polished.
 Bloom gets exactly one change, the economy cut, so any movement in prompt quality is attributable.
+
+## 2026-09-05 13:35 — D14. r2-bloom bundles two change classes, deliberately
+The brief asks for one class of change per round so improvements are attributable. `r2-bloom` carries
+two: the economy cut, and four fixes to defects the judges named (hint cap scaled to solution size,
+board contrast, wide-screen layout, win overlay not covering the board, shortcuts listed).
+**Attribution survives because the two classes land in different rubric areas** — economy can only move
+*prompt quality*, the rest can only move *UX*. If both move I can still say which did what. With the
+deadline on 7 September, spending a whole round to isolate a change worth at most 0.2 weighted was not
+defensible.
+Net effect on length: 8 630 → 8 117 characters, only 6 % shorter, but it now says more per character —
+the redundant checklist is gone and five new requirements are in. Density was the goal, not brevity.
