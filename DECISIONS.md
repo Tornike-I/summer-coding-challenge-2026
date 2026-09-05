@@ -97,3 +97,21 @@ deadline on 7 September, spending a whole round to isolate a change worth at mos
 defensible.
 Net effect on length: 8 630 → 8 117 characters, only 6 % shorter, but it now says more per character —
 the redundant checklist is gone and five new requirements are in. Density was the goal, not brevity.
+
+## 2026-09-05 21:40 — D15. Paradox Loop dropped; Bloom is the submission
+Judged 3.75 against Bloom's 4.25/4.35 and Districts' 4.25/4.25. Originality scored **3**, the lowest
+in the exercise, against my shortlist's guess of 5 — the mechanic is a recognised genre (Chronotron
+and friends) and the build layers no twist on it. Four attempts and roughly 400k sub-agent tokens went
+into the candidate I was most confident about, and it finished last. The lesson is in
+`ideas/shortlist.md`: I scored originality by how novel a mechanic felt to me, which is not the
+question the rubric asks.
+**Bloom is the submission.** Run `r2-bloom`, judge it, and ship whichever of it or `r1-bloom/run-2`
+scores higher.
+
+## 2026-09-05 21:40 — D16. Standing check: prompts must be read against themselves
+Judges have now found an internal contradiction in two of three prompts — Districts' board size
+("5×5 up to 7×7" versus a 4×4 level 1) and Paradox Loop's door rule ("open while at least one plate
+is occupied" versus a level brief demanding two plates and two ghosts). In both cases the agent
+faithfully implemented the contradiction, and in Paradox Loop's case it cost a whole level.
+**Before any prompt ships, read the rules section against the level list and confirm both can be true
+at once.** Applied to `r2-bloom` before its first run.

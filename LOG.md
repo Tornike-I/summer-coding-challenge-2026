@@ -229,3 +229,45 @@ grid collapsed; floor and wall tiles nearly indistinguishable; open doors render
 
 **Paradox Loop survives the stop rule.** Going to blind judging.
 
+## Paradox Loop judged — 3.75. The originality bet was wrong.
+
+| build | theme+runs | orig | UX | prompt | repro | **weighted** |
+|---|:--:|:--:|:--:|:--:|:--:|:--:|
+| `r1-paradox-loop/run-1` | 4 | **3** | 4 | 4 | 4 | **3.75** |
+
+I had this down as the only candidate with a shot at originality 5. **It scored 3** — the lowest
+originality of anything in the exercise. The judge's reasoning is hard to argue with:
+record-your-past-self-as-a-co-op-ghost is *"a well-established puzzle genre developers will recognise
+(Chronotron / Time Bandit / the recurring jam staple) implemented straight, with no twist layered on
+top — despite the title nothing paradoxical ever happens, ghosts only block and press."*
+
+That is the same verdict the other two candidates got, for the same reason, and I did not see it
+coming for this one. My `ideas/shortlist.md` scored it 5 for originality on the strength of the
+mechanic feeling novel to me. A jury of developers has met it.
+
+### The judge found a contradiction in my own prompt
+Section 2 says a door is open *"while at least one plate of its colour is occupied"*. The level list
+then asks level 3 for *"two plates of the same colour hold one door — needs two ghosts"*. Under my own
+rule the second plate is decorative. **The agent faithfully shipped the contradiction**, and the judge
+verified level 3 falls to a single ghost in 2 loops under a par of 3 — identical to level 2. One sixth
+of the campaign is a wasted rung and the level's name is a lie.
+
+That is my error, not the agent's, and it is the second prompt contradiction judges have caught
+(Districts had "5×5 up to 7×7" against a 4×4 level 1). **Two for two on prompts with an internal
+inconsistency that a careful reader finds and I did not.** Worth a standing check before any prompt
+ships: read the spec section against the level list and confirm they can both be true.
+
+Also found: every rewind respawns you on top of your parked ghosts, quietly breaking the "bodies never
+share a tile" rule the prompt called the specification — the agent's start-tile stacking decision,
+which I logged as a spec gap, turns out to contradict a rule I did state.
+
+### Standing
+| candidate | best weighted | status |
+|---|:--:|---|
+| `r1-bloom` | **4.35** | finalist |
+| `r1-districts` | 4.25 | dropped (round 1) |
+| `r1-paradox-loop` | 3.75 | **dropped** |
+
+**Bloom is the submission.** Next: run the revised `r2-bloom` prompt and judge it. If it does not beat
+4.35, `r1-bloom/run-2` ships as-is — it is already validated and judged.
+
