@@ -11,6 +11,7 @@ Blind judge, one sub-agent per build. Each saw only the rubric, that build's `pr
 | build | theme+runs | orig | UX | prompt | repro | **weighted** |
 |---|:--:|:--:|:--:|:--:|:--:|:--:|
 | `r1-bloom/run-1` | 5 | 4 | 4 | 4 | 4 | **4.25** |
+| `r1-bloom/run-2` | 5 | 4 | 4 | 4 | 5 | **4.35** |
 
 ### `r1-bloom/run-1` — 4.25
 The judge independently re-implemented the shipped Life rule and ran all six stored reference
@@ -30,4 +31,29 @@ doing real work — that is what separates it from a Life sandbox.
   checklist, plus some soft design prose.
 - **Reproducibility** risk named: the agent invents the boards itself, so a rerun that skimps on the
   backwards-design verification could ship an unsolvable level and break the premise.
+
+### `r1-bloom/run-2` — 4.35
+
+Same prompt, second generation. The judge again re-simulated all six levels independently and
+confirmed every reference solution wins at exactly the generation the code claims, then solved
+level 2's glider inside the shipped build. Its preview happened to serve the page from a `data:`
+URL, so the entire playthrough ran with `localStorage` throwing — the game stayed fully playable on
+in-memory progression with no console output. That is the storage-failure requirement proven by
+accident.
+
+- **Reproducibility scored 5 here against 4 on run-1** — judge variance on the same prompt, not a
+  difference in the builds. Treat the pair as ~4.5 with a spread.
+- **Biggest weakness — and this one is new**: the board is too dim for its own good. Empty cells
+  barely separate from the background and an unplanted seed is a dim green dot that is hard to spot
+  at 375px. On the one screen the player never leaves. The win overlay then covers the board, so you
+  never see the bloom you engineered.
+- **Highest-leverage fix**: lift board contrast and shrink or offset the win card so the solved
+  garden stays visible. A few lines of CSS.
+- Also: no focus trap behind `aria-modal`, and an `H` hint key that is bound but never listed.
+- **Prompt** lost its point on economy for the same reason run-1's judge gave: section 8 restates
+  sections 5 and 7 almost line for line, and several constraints appear three times.
+
+Both Bloom judges independently capped originality at 4 with the same reasoning — Conway is the most
+familiar automaton a developer jury will be shown, so the novelty sits in the wrapper, not the
+simulation. That is a ceiling no amount of polish moves.
 

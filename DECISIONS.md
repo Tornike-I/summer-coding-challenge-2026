@@ -54,3 +54,13 @@ console warning. Sound is opt-in behind a user gesture toggle, default off, and 
 ## 2026-09-05 00:05 — D10. Judge is blind
 The judging sub-agent gets only: the rubric text from `constraints.md`, the `prompt.md`, the `index.html`,
 and two screenshots. It is not told which candidate or round it is looking at, and never sees my notes.
+
+## 2026-09-05 13:05 — D11. Blind judges shared a browser instance
+The judge scoring `r1-bloom/run-2` reported that a `zoom` call returned a different candidate's tab
+from the shared preview browser. It says it disregarded the content and that the tab played no part
+in its score, and its written justifications contain nothing from another candidate — so I am keeping
+the verdict rather than rerunning it. But the blindness guarantee is weaker than intended: judges run
+in parallel against one browser.
+**Decision:** for the remaining judging, instruct judges to score from the file and screenshots only,
+without driving the browser. That costs some behavioural verification, which the automated validator
+already covers, and buys back real isolation.
