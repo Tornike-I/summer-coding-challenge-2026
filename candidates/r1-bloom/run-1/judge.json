@@ -1,0 +1,18 @@
+{
+  "theme_and_runs":   {"score": 5, "why": "Unmistakably a mini-game with goal, win/lose, score and short sessions; 25/25 static checks pass and my own headless playthrough found zero console errors, working win/loss overlays, visible refusals for stone/no-seeds/plant-during-grow, an empty-garden warning, frozen board after a win, and progress that survives localStorage throwing — and all six reference solutions genuinely solve their level inside the shipped Life engine."},
+  "originality":      {"score": 4, "why": "Not a clone from the barred list and the golf framing is fresh — plant N seeds so that some future generation lights every target, with stone that blocks seeding but not life, scoring on seeds plus generations and a 'best moment' loss report — but Conway's Life is the most familiar toy in the room for a developer jury, so it is a new twist on very known material rather than a new mechanic."},
+  "ux_design":        {"score": 4, "why": "Coherent dark-garden palette, buds distinguished by shape as well as colour, status chips, live region, shake-plus-text refusals, legend, full pointer/keyboard/touch parity, no scroll from 320px to desktop; let down by a real difficulty cliff (levels 3 and 6 need ten exactly-phased cells with only three hints), a text-heavy how-to, and a desktop layout that leaves most of a 1440px screen empty."},
+  "prompt_quality":   {"score": 4, "why": "Specifies behaviour not code and anticipates the classic unsupervised-agent failures — orphaned timers, modules under file://, storage that throws, hints revealing already-planted cells — and the 'design every level backwards from a verified seed' instruction demonstrably produced six provably solvable boards; costs a point for the heavy overlap between the section 7 verification walk and the section 8 checklist and some soft design prose."},
+  "reproducibility":  {"score": 4, "why": "Rules, screens, controls and technical constraints are pinned tightly enough that a rerun would almost certainly yield the same game; the fragile part is that the agent invents the boards itself, and a rerun that skimps on the backwards-design verification could ship an unsolvable level, which would break the whole premise."},
+  "weighted":         4.25,
+  "key_features_a_rerun_must_reproduce": [
+    "Plant at most N seeds on a bounded grid, press Grow, and win the instant one generation has every bud alive simultaneously",
+    "Correct bounded B3/S23 stepped into a fresh buffer, with Grow/Step/Pause and a one-click Reset that returns to your planting with seeds intact",
+    "Six levels designed backwards from a verified seed pattern, each solvable in the shipped build, with stone cells that refuse seeding but still take part in life",
+    "Loss reports the best moment ('best: 3 of 4 buds, at generation 11') and offers Retry with seeds preserved",
+    "Capped hints that reveal a cell of the reference solution at a score penalty, never one already planted",
+    "Single file, zero network, no console errors, pointer/keyboard/touch parity, reduced-motion support, and full playability when localStorage throws"
+  ],
+  "biggest_weakness": "The difficulty curve breaks in the back half: levels 3 and 6 require reconstructing two exactly-positioned, exactly-phased gliders — ten of eleven seeds — and only three hints are on offer, so a player who does not already know Life patterns has no route from 'stuck' to 'solved' and the game's teaching arc simply stops.",
+  "single_highest_leverage_fix": "Scale the hint allowance to the solution size (and let a hint plant its cell directly) so the two-cluster finale levels stay winnable by an ordinary player rather than only by someone who already knows the glider."
+}
