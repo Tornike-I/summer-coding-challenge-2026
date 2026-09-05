@@ -163,3 +163,36 @@ reach the exit without opening the door — is exactly the failure the "prove ev
 instruction is meant to catch, and it caught it. Same procedure-not-assertion pattern that worked for
 Bloom and Districts.
 
+## Paradox Loop — attempt three: a build, but a defective one (2026-09-05 16:17)
+
+Both agents hit the session limit again. run-1 wrote nothing; **run-2 produced a complete-looking
+48 856-byte game** that scores 24/25 on the automated checks and renders a genuinely handsome title
+screen. It is still not shippable:
+
+- **The file has no `<!DOCTYPE html>`, no `<html>`, no `<head>` and no `<body>`.** It begins at
+  `<meta charset>` and ends at `</script>`. Chromium reports `compatMode: "BackCompat"` — **the game
+  runs in quirks mode**, with the old box model. It happens to look right; that is luck, not design.
+- No `<html lang>`, the one automated check it fails.
+- The title screen is left-aligned in a 1440px viewport — the exact "phone column adrift on desktop"
+  defect the Districts judges named, which this prompt revision explicitly told it to avoid.
+
+The agent died mid-repair. Its last words: *"the screenshot caught a real bug: `#s-play`'s ID rule
+outranks `.screen[hidden]`, so the play screen was rendering on top of every other screen. Fixing."*
+It got that fix in — screens switch correctly now — but never restored the document shell.
+
+**Contest rules forbid hand-editing the output**, so a two-line fix I could make in ten seconds is not
+available. The build is evidence, not a candidate.
+
+### What three failures actually tell us
+The failures were caused by *my* session limits, not the agent's own budget, so the evidence is
+confounded. But the surviving artefact is the tell: this agent was still rewriting its document shell
+after building six levels, a ghost replay engine and a solver. **Paradox Loop asks for more than the
+other two candidates by a wide margin**, and under the contest's real 60-minute cap that is a live
+risk to both "app runs" (25 %) and reproducibility (10 %) — the organiser's own re-run could easily
+land exactly here.
+
+### Stop rule set now, before the next attempt
+One more Paradox Loop run, with a line requiring a complete HTML document. **If attempt four does not
+produce a valid, complete build, Paradox Loop is dropped and Bloom becomes the submission.** Bloom
+already has two judged builds at 4.25 and 4.35 and a revised round-2 prompt ready to run.
+

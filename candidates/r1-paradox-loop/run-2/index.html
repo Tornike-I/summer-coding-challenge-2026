@@ -1,0 +1,1082 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Paradox Loop</title>
+<style>
+:root{
+  --bg:#0f131b; --bg2:#161c27; --bg3:#1f2735; --bg4:#2a3446;
+  --line:#33405a; --text:#e8eef8; --muted:#9dabc4; --dim:#6d7b93;
+  --you:#2ee6f6;
+  --ghost:#f5a23c;
+  --ca:#b08cff; --cb:#b6e34a;
+  --bad:#ff6b6b; --good:#3ddc97;
+  --cell:44px; --gap:5px; --cols:7; --rows:3;
+  --r:12px; --r2:16px;
+  --fs0:0.74rem; --fs1:0.86rem; --fs2:1rem; --fs3:1.25rem; --fs4:1.9rem;
+  --font:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--font)}
+body{font-size:var(--fs2);-webkit-text-size-adjust:100%;overscroll-behavior:none}
+button{font:inherit;color:inherit;font-family:var(--font)}
+#app{height:100vh;height:100dvh;width:100%;position:relative;overflow:hidden}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;overflow:hidden}
+.screen[hidden]{display:none}
+.pad{padding:clamp(14px,3vw,30px)}
+.scroller{overflow-y:auto;overflow-x:hidden;flex:1;min-height:0;-webkit-overflow-scrolling:touch}
+.center{align-items:center;justify-content:center}
+.wrap{width:min(880px,100%);margin:0 auto}
+
+h1,h2,h3{margin:0;font-weight:650;letter-spacing:-.02em;line-height:1.15}
+h1{font-size:clamp(2.1rem,8vw,3.4rem)}
+h2{font-size:var(--fs4)}
+h3{font-size:var(--fs3)}
+p{margin:0;line-height:1.55;color:var(--muted)}
+.hook{font-size:var(--fs2);color:var(--muted);max-width:36ch}
+.tiny{font-size:var(--fs0);color:var(--dim);letter-spacing:.09em;text-transform:uppercase;font-weight:700}
+.stack{display:flex;flex-direction:column;gap:clamp(10px,2.4vw,18px)}
+.stack.s{gap:9px}
+
+.btn{min-height:46px;min-width:46px;padding:11px 20px;border-radius:var(--r);border:1px solid var(--line);
+  background:var(--bg3);color:var(--text);cursor:pointer;font-size:var(--fs2);font-weight:560;
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  transition:background .14s,border-color .14s,transform .1s;
+  touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.btn:hover{background:var(--bg4);border-color:#4a5c7e}
+.btn:active{transform:translateY(1px)}
+.btn:focus-visible{outline:3px solid var(--you);outline-offset:2px}
+.btn.primary{background:var(--you);border-color:var(--you);color:#06222a;font-weight:700}
+.btn.primary:hover{background:#63f0fc;border-color:#63f0fc}
+.btn.ghosty{background:transparent}
+.btn[disabled]{opacity:.42;cursor:not-allowed}
+.btn.wide{width:100%}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+
+.chip{display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border:1px solid var(--line);
+  border-radius:999px;font-size:var(--fs0);color:var(--muted);background:var(--bg2)}
+.titleart{display:flex;gap:10px;align-items:center}
+
+.steps{display:grid;gap:14px;grid-template-columns:1fr}
+@media(min-width:760px){.steps{grid-template-columns:repeat(3,1fr)}}
+.step{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r2);padding:16px;
+  display:flex;flex-direction:column;gap:11px}
+.step h3{font-size:var(--fs2)}
+.demo{background:var(--bg);border-radius:10px;padding:12px;display:flex;gap:6px;
+  justify-content:center;align-items:center;min-height:76px}
+.dtile{width:32px;height:32px;border-radius:9px;background:var(--bg3);display:grid;place-items:center;flex:none;position:relative}
+.dtile.wall{background:#0b0e15;box-shadow:inset 0 0 0 1px #1b2331}
+.dtile.exit{background:#14342f;box-shadow:inset 0 0 0 2px #2f7d68}
+.dtile svg{width:78%;height:78%;display:block;overflow:visible}
+.arrow{color:var(--dim);font-size:var(--fs1)}
+.legend{display:grid;gap:9px;grid-template-columns:1fr}
+@media(min-width:560px){.legend{grid-template-columns:1fr 1fr}}
+.leg{display:flex;gap:11px;align-items:center;background:var(--bg2);border:1px solid var(--line);
+  border-radius:10px;padding:9px 12px;font-size:var(--fs1);color:var(--muted)}
+.leg b{color:var(--text);font-weight:600}
+.leg .dtile{width:28px;height:28px}
+.keycap{display:inline-block;min-width:26px;padding:2px 7px;border-radius:6px;background:var(--bg3);
+  border:1px solid var(--line);border-bottom-width:2px;font-size:var(--fs0);color:var(--text);
+  font-weight:700;text-align:center}
+
+.levels{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(212px,1fr))}
+.lvl{position:relative;text-align:left;flex-direction:column;align-items:stretch;justify-content:flex-start;
+  gap:5px;padding:15px 16px;min-height:98px;border-radius:var(--r2)}
+.lvl .n{font-size:var(--fs0);color:var(--dim);letter-spacing:.08em;text-transform:uppercase;font-weight:700}
+.lvl .t{font-size:var(--fs2);font-weight:620;color:var(--text)}
+.lvl .b{font-size:var(--fs1);color:var(--muted);font-variant-numeric:tabular-nums}
+.lvl.locked{opacity:.5}
+.lvl.done{border-color:#2c5a4a}
+.lvl .badge{position:absolute;top:13px;right:14px;font-size:var(--fs1)}
+
+#s-play{display:flex;flex-direction:column;padding:clamp(8px,2vw,16px);gap:clamp(8px,1.6vw,14px)}
+.statusbar{display:flex;gap:7px;align-items:stretch;flex-wrap:nowrap;overflow:hidden}
+.stat{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:6px 9px;min-width:0;flex:1 1 0}
+.stat .k{font-size:0.62rem;letter-spacing:.07em;text-transform:uppercase;color:var(--dim);font-weight:700;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat .v{font-size:var(--fs1);font-weight:650;font-variant-numeric:tabular-nums;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat.warn .v{color:var(--bad)}
+.playmain{flex:1;min-height:0;display:flex;flex-direction:column;gap:clamp(8px,1.6vw,14px);
+  align-items:center;justify-content:center}
+.boardwrap{flex:1;min-height:0;width:100%;display:grid;place-items:center;overflow:hidden}
+.board{position:relative;display:grid;gap:var(--gap);touch-action:none;
+  grid-template-columns:repeat(var(--cols),var(--cell));grid-template-rows:repeat(var(--rows),var(--cell))}
+.tile{border-radius:calc(var(--cell)*0.18);background:var(--bg3);position:relative;display:grid;place-items:center}
+.tile.wall{background:#0b0e15;box-shadow:inset 0 0 0 1px #171e2b}
+.tile.start{box-shadow:inset 0 0 0 2px #3a4763}
+.tile.exit{background:#14342f;box-shadow:inset 0 0 0 2px #2f7d68}
+.tile.door{background:var(--bg4);box-shadow:inset 0 0 0 2px #3d4a63}
+.tile.door.open{background:var(--bg3);box-shadow:none}
+.tile svg{width:74%;height:74%;display:block;overflow:visible}
+.tile.flash{animation:flash .34s ease-out}
+@keyframes flash{0%{background:var(--bad)}100%{background:var(--bg3)}}
+.tokens{position:absolute;inset:0;pointer-events:none}
+.token{position:absolute;left:0;top:0;width:var(--cell);height:var(--cell);
+  transform:translate(calc(var(--x) * (var(--cell) + var(--gap))),calc(var(--y) * (var(--cell) + var(--gap))));
+  transition:transform .13s ease-out;display:grid;place-items:center}
+.token svg{width:86%;height:86%;display:block;overflow:visible}
+.token.g{opacity:.6}
+.controls{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;width:100%}
+.dpad{display:grid;grid-template-columns:repeat(3,minmax(46px,54px));grid-template-rows:repeat(2,minmax(46px,54px));gap:6px}
+.dpad .btn{padding:0;font-size:1.1rem}
+.dpad .u{grid-area:1/2}
+.dpad .dn{grid-area:2/2}
+.dpad .l{grid-area:2/1}
+.dpad .r{grid-area:2/3}
+.dpad .w{grid-area:1/3;font-size:var(--fs0);font-weight:700}
+.dpad .p{grid-area:1/1;font-size:var(--fs0);font-weight:700}
+.acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.acts .btn{padding:11px 14px;font-size:var(--fs1)}
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);
+  white-space:nowrap;border:0}
+.msg{min-height:1.4em;font-size:var(--fs1);color:var(--muted);text-align:center;width:100%;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msg.bad{color:var(--bad)}
+.msg.good{color:var(--good)}
+@media(min-width:900px) and (min-height:520px){
+  #s-play{display:grid;grid-template-columns:minmax(0,1fr) clamp(280px,26vw,350px);
+    grid-template-rows:minmax(0,1fr);gap:clamp(12px,2vw,26px);align-items:stretch;padding:clamp(14px,2vw,26px)}
+  .playmain{order:1;justify-content:center;min-width:0}
+  .side{order:2;display:flex;flex-direction:column;gap:14px;min-height:0;overflow-y:auto;justify-content:center}
+  .statusbar{flex-direction:column;align-items:stretch;gap:9px}
+  .stat{flex:none;padding:10px 13px}
+  .stat .v{font-size:var(--fs3)}
+  .controls{flex-direction:column;gap:14px}
+  .acts{width:100%}
+  .acts .btn{width:100%}
+  .msg{white-space:normal}
+}
+@media(max-width:899px){
+  .side{display:contents}
+  .statusbar{order:1}
+  .playmain{order:2}
+  .controls{order:3}
+}
+
+.overlay{position:absolute;inset:0;background:rgba(6,9,14,.8);display:flex;align-items:center;
+  justify-content:center;padding:16px;z-index:20;-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+.overlay[hidden]{display:none}
+.modal{background:var(--bg2);border:1px solid var(--line);border-radius:20px;padding:clamp(18px,4vw,28px);
+  width:min(430px,100%);max-height:92%;overflow-y:auto;display:flex;flex-direction:column;gap:16px;
+  animation:pop .18s ease-out}
+@keyframes pop{from{transform:scale(.96);opacity:0}to{transform:none;opacity:1}}
+.scores{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.score{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:11px}
+.score .k{font-size:0.62rem;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);font-weight:700}
+.score .v{font-size:var(--fs3);font-weight:700;font-variant-numeric:tabular-nums}
+.score .v small{font-size:var(--fs1);color:var(--muted);font-weight:500}
+.trophy{font-size:2.6rem;line-height:1}
+@media(max-height:620px){
+  .modal{gap:12px;padding:16px}
+  .trophy{font-size:1.7rem}
+  .modal h2{font-size:1.45rem}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+  .tile.flash{box-shadow:inset 0 0 0 3px var(--bad)}
+}
+</style>
+
+<div id="app">
+
+<section class="screen pad center" id="s-title">
+  <div class="wrap stack">
+    <div class="titleart" aria-hidden="true">
+      <span class="dtile"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="6" fill="var(--you)"/><circle cx="9.5" cy="10.5" r="1.7" fill="#06222a"/><circle cx="14.5" cy="10.5" r="1.7" fill="#06222a"/></svg></span>
+      <span class="dtile" style="opacity:.6"><svg viewBox="0 0 24 24"><path d="M4 21V10a8 8 0 0 1 16 0v11l-2.7-2-2.6 2-2.7-2-2.7 2-2.6-2z" fill="var(--ghost)"/><circle cx="9.5" cy="11" r="1.6" fill="#2a1a06"/><circle cx="14.5" cy="11" r="1.6" fill="#2a1a06"/></svg></span>
+      <span class="dtile" style="opacity:.35"><svg viewBox="0 0 24 24"><path d="M4 21V10a8 8 0 0 1 16 0v11l-2.7-2-2.6 2-2.7-2-2.7 2-2.6-2z" fill="var(--ghost)"/><circle cx="9.5" cy="11" r="1.6" fill="#2a1a06"/><circle cx="14.5" cy="11" r="1.6" fill="#2a1a06"/></svg></span>
+    </div>
+    <h1>Paradox&nbsp;Loop</h1>
+    <p class="hook">The room needs more hands than you have. So borrow your own past &mdash; rewind, and yesterday&rsquo;s you walks beside you.</p>
+    <div class="stack s" style="max-width:320px;width:100%">
+      <button class="btn primary wide" id="b-play">Play</button>
+      <button class="btn wide" id="b-how">How to play</button>
+      <button class="btn ghosty wide" id="b-levels">Levels</button>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="s-how" hidden>
+  <div class="scroller pad">
+    <div class="wrap stack">
+      <div class="row" style="align-items:center;justify-content:space-between">
+        <h2>How to play</h2>
+        <button class="btn ghosty" id="b-how-back">Back</button>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <span class="tiny">Step 1</span>
+          <h3>Walk the room</h3>
+          <div class="demo" aria-hidden="true">
+            <span class="dtile"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="6" fill="var(--you)"/><circle cx="9.5" cy="10.5" r="1.7" fill="#06222a"/><circle cx="14.5" cy="10.5" r="1.7" fill="#06222a"/></svg></span>
+            <span class="arrow">&rarr;</span>
+            <span class="dtile"></span>
+            <span class="dtile exit"><svg viewBox="0 0 24 24"><path d="M5 20V6l8-3v18z" fill="none" stroke="var(--good)" stroke-width="2" stroke-linejoin="round"/><circle cx="10.5" cy="12" r="1.3" fill="var(--good)"/></svg></span>
+          </div>
+          <p>One key press is one turn. Move one tile, or wait. Reach the exit and the level is done.</p>
+        </div>
+        <div class="step">
+          <span class="tiny">Step 2</span>
+          <h3>Plates open doors</h3>
+          <div class="demo" aria-hidden="true">
+            <span class="dtile"><svg viewBox="0 0 24 24"><path d="M12 4l8 8-8 8-8-8z" fill="none" stroke="var(--ca)" stroke-width="2.4"/></svg></span>
+            <span class="arrow">&rarr;</span>
+            <span class="dtile" style="box-shadow:inset 0 0 0 2px #3d4a63"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="none" stroke="var(--ca)" stroke-width="2.2"/><path d="M12 7.5l4.5 4.5-4.5 4.5-4.5-4.5z" fill="var(--ca)"/></svg></span>
+          </div>
+          <p>A door stays open only while a body stands on a plate of its shape. Step off and it shuts again.</p>
+        </div>
+        <div class="step">
+          <span class="tiny">Step 3</span>
+          <h3>Rewind for a ghost</h3>
+          <div class="demo" aria-hidden="true">
+            <span class="dtile" style="opacity:.6"><svg viewBox="0 0 24 24"><path d="M4 21V10a8 8 0 0 1 16 0v11l-2.7-2-2.6 2-2.7-2-2.7 2-2.6-2z" fill="var(--ghost)"/><circle cx="9.5" cy="11" r="1.6" fill="#2a1a06"/><circle cx="14.5" cy="11" r="1.6" fill="#2a1a06"/></svg></span>
+            <span class="arrow">+</span>
+            <span class="dtile"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="6" fill="var(--you)"/><circle cx="9.5" cy="10.5" r="1.7" fill="#06222a"/><circle cx="14.5" cy="10.5" r="1.7" fill="#06222a"/></svg></span>
+          </div>
+          <p>Rewind and the room resets &mdash; but a ghost now replays everything you just did, one turn at a time, while you start again.</p>
+        </div>
+      </div>
+      <div class="stack s">
+        <span class="tiny">Good to know</span>
+        <div class="legend">
+          <div class="leg"><span class="dtile" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4l8 8-8 8-8-8z" fill="none" stroke="var(--ca)" stroke-width="2.4"/></svg></span><span><b>Diamond</b> plates and doors are one colour, <b>squares</b> the other. Shape tells them apart.</span></div>
+          <div class="leg"><span class="dtile" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2" fill="none" stroke="var(--cb)" stroke-width="2.4"/></svg></span><span>Bodies never share a tile. A blocked ghost just <b>waits</b> that turn and carries on.</span></div>
+          <div class="leg"><span aria-hidden="true" style="flex:none;width:28px;text-align:center">&#9203;</span><span>Hit the turn limit and the loop rewinds itself. Run out of loops and the level is lost &mdash; restart and try a cleverer plan.</span></div>
+          <div class="leg"><span aria-hidden="true" style="flex:none;width:28px;text-align:center">&#127942;</span><span>A ghost on the exit does not count. <b>You</b> have to stand there.</span></div>
+        </div>
+      </div>
+      <div class="stack s">
+        <span class="tiny">Keys</span>
+        <p><span class="keycap">&larr;</span> <span class="keycap">&darr;</span> <span class="keycap">&uarr;</span> <span class="keycap">&rarr;</span> or <span class="keycap">W</span><span class="keycap">A</span><span class="keycap">S</span><span class="keycap">D</span> move &middot; <span class="keycap">Space</span> wait &middot; <span class="keycap">Enter</span> rewind &middot; <span class="keycap">Backspace</span> restart &middot; <span class="keycap">Esc</span> pause. Every one of them is a button on screen too, and you can swipe the board.</p>
+      </div>
+      <div class="row">
+        <button class="btn primary" id="b-how-play">Start playing</button>
+        <button class="btn ghosty" id="b-how-back2">Back to title</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="s-levels" hidden>
+  <div class="scroller pad">
+    <div class="wrap stack">
+      <div class="row" style="align-items:center;justify-content:space-between">
+        <h2>Levels</h2>
+        <button class="btn ghosty" id="b-lv-back">Back</button>
+      </div>
+      <p id="lv-sub">Pick a room.</p>
+      <div class="levels" id="lv-grid"></div>
+      <div class="row">
+        <button class="btn ghosty" id="b-wipe">Erase progress</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="s-play" hidden>
+  <div class="playmain">
+    <div class="boardwrap" id="boardwrap">
+      <div class="board" id="board" role="group" aria-label="Puzzle board"></div>
+    </div>
+    <p class="msg" id="msg"></p>
+  </div>
+  <div class="side">
+    <div class="statusbar" id="statusbar">
+      <div class="stat"><div class="k">Level</div><div class="v" id="st-level">1</div></div>
+      <div class="stat" id="st-turns-box"><div class="k">Turns left</div><div class="v" id="st-turns">0</div></div>
+      <div class="stat" id="st-loops-box"><div class="k">Loops left</div><div class="v" id="st-loops">0</div></div>
+      <div class="stat"><div class="k">Ghosts</div><div class="v" id="st-ghosts">0</div></div>
+    </div>
+    <div class="controls">
+      <div class="dpad">
+        <button class="btn p" id="b-pause" aria-label="Pause menu">Esc</button>
+        <button class="btn u" id="b-up" aria-label="Move up">&#9650;</button>
+        <button class="btn w" id="b-wait" aria-label="Wait one turn">Wait</button>
+        <button class="btn l" id="b-left" aria-label="Move left">&#9664;</button>
+        <button class="btn dn" id="b-down" aria-label="Move down">&#9660;</button>
+        <button class="btn r" id="b-right" aria-label="Move right">&#9654;</button>
+      </div>
+      <div class="acts">
+        <button class="btn" id="b-rewind">&#8634; Rewind</button>
+        <button class="btn ghosty" id="b-restart">Restart level</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<p class="sr" id="live" role="status" aria-live="polite"></p>
+
+<div class="overlay" id="ov" hidden>
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="ov-title">
+    <div class="stack s">
+      <div class="trophy" id="ov-icon" aria-hidden="true"></div>
+      <h2 id="ov-title">Paused</h2>
+      <p id="ov-text"></p>
+    </div>
+    <div class="scores" id="ov-scores" hidden>
+      <div class="score"><div class="k">Loops used</div><div class="v"><span id="sc-loops">0</span> <small id="sc-par"></small></div></div>
+      <div class="score"><div class="k">Turns taken</div><div class="v" id="sc-turns">0</div></div>
+      <div class="score" style="grid-column:1/-1"><div class="k" id="sc-best-k">Your best here</div><div class="v" id="sc-best">&mdash;</div></div>
+    </div>
+    <div class="stack s" id="ov-buttons"></div>
+  </div>
+</div>
+
+</div>
+
+<script>
+"use strict";
+(function () {
+  /* ---------------- level data ---------------- */
+  var LEVELS = [
+    { name: "First Steps", hint: "Walk to the door on the right.", turnLimit: 8, par: 1,
+      grid: ["#######",
+             "#S...E#",
+             "#######"] },
+    { name: "Borrowed Hands", hint: "That door needs someone on the plate. You only have you — so rewind and bring a ghost.", turnLimit: 8, par: 2,
+      grid: ["#######",
+             "#S..#E#",
+             "#...A.#",
+             "#a..#.#",
+             "#######"] },
+    { name: "Two Keys", hint: "Two doors, two shapes, two plates. One ghost is not enough.", turnLimit: 8, par: 3,
+      grid: ["#########",
+             "#a#b#####",
+             "#.#.#####",
+             "#S..A.BE#",
+             "#########"] },
+    { name: "Hold Still", hint: "A plate only counts while someone is standing on it. Make your ghost stop.", turnLimit: 9, par: 2,
+      grid: ["#########",
+             "#S.a..###",
+             "#.#######",
+             "#...A..E#",
+             "#########"] },
+    { name: "Out of My Way", hint: "One corridor, two of you. Let your past self through first.", turnLimit: 11, par: 2,
+      grid: ["#########",
+             "####E####",
+             "##.#A####",
+             "#S.....a#",
+             "#########"] },
+    { name: "The Long Way Round", hint: "The diamond opens the way to the square. Three loops, no spare moves.", turnLimit: 11, par: 3,
+      grid: ["#########",
+             "####E####",
+             "####B####",
+             "#....####",
+             "#.a######",
+             "#S.A..b##",
+             "#########"] }
+  ];
+
+  var DIRS = { U: [0, -1], D: [0, 1], L: [-1, 0], R: [1, 0], W: [0, 0] };
+  var STORE_KEY = "paradoxLoop.v1";
+
+  /* ---------------- storage (never throws) ---------------- */
+  var mem = { unlocked: 0, best: {} };
+  var storageOK = true;
+
+  function loadSave() {
+    try {
+      var raw = window.localStorage.getItem(STORE_KEY);
+      if (!raw) return;
+      var d = JSON.parse(raw);
+      if (!d || typeof d !== "object") return;
+      var u = d.unlocked;
+      if (typeof u === "number" && isFinite(u)) {
+        mem.unlocked = Math.max(0, Math.min(LEVELS.length - 1, Math.floor(u)));
+      }
+      if (d.best && typeof d.best === "object") {
+        for (var i = 0; i < LEVELS.length; i++) {
+          var b = d.best[i];
+          if (b && typeof b === "object" &&
+              typeof b.loops === "number" && isFinite(b.loops) && b.loops > 0 &&
+              typeof b.turns === "number" && isFinite(b.turns) && b.turns >= 0) {
+            mem.best[i] = { loops: Math.floor(b.loops), turns: Math.floor(b.turns) };
+          }
+        }
+      }
+    } catch (e) {
+      storageOK = false;
+    }
+  }
+
+  function saveSave() {
+    try {
+      window.localStorage.setItem(STORE_KEY, JSON.stringify(mem));
+    } catch (e) {
+      storageOK = false;
+    }
+  }
+
+  /* ---------------- svg helpers ---------------- */
+  function svg(inner, extra) {
+    return '<svg viewBox="0 0 24 24" aria-hidden="true"' + (extra || "") + ">" + inner + "</svg>";
+  }
+  var ART = {
+    you: svg('<rect x="3" y="3" width="18" height="18" rx="6" fill="var(--you)"/>' +
+             '<circle cx="9.5" cy="10.5" r="1.7" fill="#06222a"/>' +
+             '<circle cx="14.5" cy="10.5" r="1.7" fill="#06222a"/>'),
+    ghost: svg('<path d="M4 21V10a8 8 0 0 1 16 0v11l-2.7-2-2.6 2-2.7-2-2.7 2-2.6-2z" fill="var(--ghost)"/>' +
+               '<circle cx="9.5" cy="11" r="1.6" fill="#2a1a06"/>' +
+               '<circle cx="14.5" cy="11" r="1.6" fill="#2a1a06"/>'),
+    exit: svg('<path d="M5 20V6l8-3v18z" fill="none" stroke="var(--good)" stroke-width="2" stroke-linejoin="round"/>' +
+              '<circle cx="10.6" cy="12" r="1.3" fill="var(--good)"/>'),
+    start: svg('<circle cx="12" cy="12" r="5" fill="none" stroke="#4a5b7d" stroke-width="2" stroke-dasharray="3 3"/>'),
+    plateA: svg('<path d="M12 4l8 8-8 8-8-8z" fill="none" stroke="var(--ca)" stroke-width="2.4"/>'),
+    plateB: svg('<rect x="5" y="5" width="14" height="14" rx="2" fill="none" stroke="var(--cb)" stroke-width="2.4"/>'),
+    plateAon: svg('<path d="M12 4l8 8-8 8-8-8z" fill="var(--ca)" stroke="var(--ca)" stroke-width="2.4"/>'),
+    plateBon: svg('<rect x="5" y="5" width="14" height="14" rx="2" fill="var(--cb)" stroke="var(--cb)" stroke-width="2.4"/>'),
+    doorA: svg('<rect x="2" y="2" width="20" height="20" rx="3" fill="none" stroke="var(--ca)" stroke-width="2.2"/>' +
+               '<path d="M12 6.5l5.5 5.5-5.5 5.5-5.5-5.5z" fill="var(--ca)"/>'),
+    doorB: svg('<rect x="2" y="2" width="20" height="20" rx="3" fill="none" stroke="var(--cb)" stroke-width="2.2"/>' +
+               '<rect x="7" y="7" width="10" height="10" rx="1.5" fill="var(--cb)"/>'),
+    doorAopen: svg('<path d="M12 6.5l5.5 5.5-5.5 5.5-5.5-5.5z" fill="none" stroke="var(--ca)" stroke-width="1.6" stroke-dasharray="2.5 2.5" opacity="0.75"/>'),
+    doorBopen: svg('<rect x="7" y="7" width="10" height="10" rx="1.5" fill="none" stroke="var(--cb)" stroke-width="1.6" stroke-dasharray="2.5 2.5" opacity="0.75"/>')
+  };
+
+  /* ---------------- level parsing ---------------- */
+  function parseLevel(def) {
+    var h = def.grid.length, w = def.grid[0].length;
+    var tiles = [], plates = [], start = null, exit = null, y, x;
+    for (y = 0; y < h; y++) {
+      var row = [];
+      for (x = 0; x < w; x++) {
+        var c = def.grid[y].charAt(x), kind = "floor", col = null;
+        if (c === "#") kind = "wall";
+        else if (c === "S") { kind = "start"; start = { x: x, y: y }; }
+        else if (c === "E") { kind = "exit"; exit = { x: x, y: y }; }
+        else if (c === "a" || c === "b") { kind = "plate"; col = c; plates.push({ x: x, y: y, col: c }); }
+        else if (c === "A" || c === "B") { kind = "door"; col = c.toLowerCase(); }
+        row.push({ kind: kind, col: col });
+      }
+      tiles.push(row);
+    }
+    return { name: def.name, hint: def.hint, turnLimit: def.turnLimit, par: def.par,
+             w: w, h: h, tiles: tiles, plates: plates, start: start, exit: exit };
+  }
+  var MAPS = [];
+  for (var li = 0; li < LEVELS.length; li++) MAPS.push(parseLevel(LEVELS[li]));
+
+  /* ---------------- dom refs ---------------- */
+  function $(id) { return document.getElementById(id); }
+  var screens = { title: $("s-title"), how: $("s-how"), levels: $("s-levels"), play: $("s-play") };
+  var boardEl = $("board"), boardWrap = $("boardwrap"), msgEl = $("msg"), liveEl = $("live");
+  var ovEl = $("ov"), modalEl = $("modal");
+  var tileEls = [], tokenEls = [];
+
+  /* ---------------- game state ---------------- */
+  var G = {
+    screen: "title",
+    levelIndex: 0,
+    map: null,
+    bodies: [],
+    ghosts: [],
+    ghostIdx: [],
+    recording: [],
+    turn: 0,
+    loopsUsed: 1,
+    totalTurns: 0,
+    over: false,
+    modal: null,
+    lastFocus: null
+  };
+
+  /* ---------------- rules ---------------- */
+  function openColours(bodies) {
+    var o = { a: false, b: false }, i, p;
+    for (i = 0; i < G.map.plates.length; i++) {
+      p = G.map.plates[i];
+      for (var j = 0; j < bodies.length; j++) {
+        if (bodies[j].x === p.x && bodies[j].y === p.y) { o[p.col] = true; break; }
+      }
+    }
+    return o;
+  }
+  function tileAt(x, y) {
+    if (x < 0 || y < 0 || x >= G.map.w || y >= G.map.h) return null;
+    return G.map.tiles[y][x];
+  }
+  function passable(x, y, open) {
+    var t = tileAt(x, y);
+    if (!t || t.kind === "wall") return false;
+    if (t.kind === "door") return !!open[t.col];
+    return true;
+  }
+  function occupiedBy(bodies, x, y, skip) {
+    for (var i = 0; i < bodies.length; i++) {
+      if (i !== skip && bodies[i].x === x && bodies[i].y === y) return true;
+    }
+    return false;
+  }
+
+  /* returns null on refusal, or {reason} */
+  function tryTurn(action) {
+    var bodies = G.bodies, open = openColours(bodies), i;
+    if (action !== "W") {
+      var d = DIRS[action];
+      var nx = bodies[0].x + d[0], ny = bodies[0].y + d[1];
+      var t = tileAt(nx, ny);
+      var reason = null;
+      if (!t || t.kind === "wall") reason = "A wall. That way is solid.";
+      else if (t.kind === "door" && !open[t.col]) reason = "That door is shut — nobody is on a " + (t.col === "a" ? "diamond" : "square") + " plate.";
+      else if (occupiedBy(bodies, nx, ny, 0)) reason = "A ghost is standing there.";
+      if (reason) return { ok: false, reason: reason, x: nx, y: ny };
+      bodies[0] = { x: nx, y: ny };
+    }
+    /* ghosts resolve in creation order */
+    for (i = 0; i < G.ghosts.length; i++) {
+      var rec = G.ghosts[i], idx = G.ghostIdx[i];
+      if (idx >= rec.length) continue;
+      var a = rec[idx];
+      if (a === "W") { G.ghostIdx[i] = idx + 1; continue; }
+      var gd = DIRS[a];
+      var gx = bodies[i + 1].x + gd[0], gy = bodies[i + 1].y + gd[1];
+      var go = openColours(bodies);
+      if (!passable(gx, gy, go) || occupiedBy(bodies, gx, gy, i + 1)) continue; /* waits, keeps recording */
+      bodies[i + 1] = { x: gx, y: gy };
+      G.ghostIdx[i] = idx + 1;
+    }
+    G.recording.push(action);
+    G.turn++;
+    G.totalTurns++;
+    return { ok: true };
+  }
+
+  /* ---------------- board building ---------------- */
+  function buildBoard() {
+    var m = G.map, x, y, html = [];
+    boardEl.style.setProperty("--cols", m.w);
+    boardEl.style.setProperty("--rows", m.h);
+    for (y = 0; y < m.h; y++) {
+      for (x = 0; x < m.w; x++) {
+        var t = m.tiles[y][x], cls = "tile", inner = "";
+        if (t.kind === "wall") cls += " wall";
+        else if (t.kind === "start") { cls += " start"; inner = ART.start; }
+        else if (t.kind === "exit") { cls += " exit"; inner = ART.exit; }
+        else if (t.kind === "plate") inner = t.col === "a" ? ART.plateA : ART.plateB;
+        else if (t.kind === "door") { cls += " door"; inner = t.col === "a" ? ART.doorA : ART.doorB; }
+        html.push('<div class="' + cls + '" data-i="' + (y * m.w + x) + '">' + inner + "</div>");
+      }
+    }
+    html.push('<div class="tokens" id="tokens"></div>');
+    boardEl.innerHTML = html.join("");
+    tileEls = [];
+    var kids = boardEl.children;
+    for (var i = 0; i < kids.length; i++) {
+      if (kids[i].className.indexOf("tokens") === -1) tileEls.push(kids[i]);
+    }
+    boardEl.setAttribute("aria-label",
+      "Level " + (G.levelIndex + 1) + ", " + m.name + ", a " + m.w + " by " + m.h + " grid.");
+    layout();
+  }
+
+  function buildTokens() {
+    var host = $("tokens"), html = [], i;
+    for (i = 0; i < G.bodies.length; i++) {
+      if (i === 0) html.push('<div class="token you">' + ART.you + "</div>");
+      else html.push('<div class="token g">' + ART.ghost + "</div>");
+    }
+    host.innerHTML = html.join("");
+    tokenEls = [];
+    for (i = 0; i < host.children.length; i++) tokenEls.push(host.children[i]);
+    positionTokens();
+  }
+
+  function positionTokens() {
+    for (var i = 0; i < tokenEls.length && i < G.bodies.length; i++) {
+      tokenEls[i].style.setProperty("--x", G.bodies[i].x);
+      tokenEls[i].style.setProperty("--y", G.bodies[i].y);
+    }
+  }
+
+  function layout() {
+    if (!G.map) return;
+    var m = G.map;
+    var r = boardWrap.getBoundingClientRect();
+    /* a not-yet-laid-out box would lock the board at minimum size; the observer calls back */
+    if (r.width < 40 || r.height < 40) return;
+    var availW = r.width - 4, availH = r.height - 4;
+    var gap = m.w > 7 || m.h > 5 ? 4 : 5;
+    var cw = (availW - gap * (m.w - 1)) / m.w;
+    var ch = (availH - gap * (m.h - 1)) / m.h;
+    var cell = Math.floor(Math.min(cw, ch));
+    if (!isFinite(cell) || cell < 16) cell = 16;
+    if (cell > 76) cell = 76;
+    boardEl.style.setProperty("--cell", cell + "px");
+    boardEl.style.setProperty("--gap", gap + "px");
+  }
+
+  /* ---------------- rendering ---------------- */
+  function render() {
+    var m = G.map, open = openColours(G.bodies), i, x, y;
+    for (y = 0; y < m.h; y++) {
+      for (x = 0; x < m.w; x++) {
+        var t = m.tiles[y][x], el = tileEls[y * m.w + x];
+        if (!el) continue;
+        if (t.kind === "door") {
+          var isOpen = !!open[t.col];
+          if (el.classList.contains("open") !== isOpen) {
+            el.classList.toggle("open", isOpen);
+            el.innerHTML = isOpen ? (t.col === "a" ? ART.doorAopen : ART.doorBopen)
+                                  : (t.col === "a" ? ART.doorA : ART.doorB);
+          }
+        } else if (t.kind === "plate") {
+          var on = false;
+          for (i = 0; i < G.bodies.length; i++) {
+            if (G.bodies[i].x === x && G.bodies[i].y === y) { on = true; break; }
+          }
+          var wasOn = el.getAttribute("data-on") === "1";
+          if (on !== wasOn) {
+            el.setAttribute("data-on", on ? "1" : "0");
+            el.innerHTML = on ? (t.col === "a" ? ART.plateAon : ART.plateBon)
+                              : (t.col === "a" ? ART.plateA : ART.plateB);
+          }
+        }
+      }
+    }
+    positionTokens();
+    var turnsLeft = G.map.turnLimit - G.turn;
+    var loopsLeft = G.map.par - G.loopsUsed;
+    $("st-level").textContent = (G.levelIndex + 1) + " · " + m.name;
+    $("st-turns").textContent = turnsLeft + " / " + m.turnLimit;
+    $("st-loops").textContent = loopsLeft + " / " + m.par;
+    $("st-ghosts").textContent = String(G.ghosts.length);
+    $("st-turns-box").classList.toggle("warn", turnsLeft <= 2);
+    $("st-loops-box").classList.toggle("warn", loopsLeft === 0);
+    $("b-rewind").disabled = G.over || loopsLeft <= 0;
+  }
+
+  var msgTimer = 0;
+  function say(text, kind, announce) {
+    msgEl.textContent = text || "";
+    msgEl.className = "msg" + (kind ? " " + kind : "");
+    if (announce !== false && text) liveEl.textContent = text;
+    if (msgTimer) { clearTimeout(msgTimer); msgTimer = 0; }
+    if (text && kind === "bad") {
+      msgTimer = setTimeout(function () {
+        if (G.screen === "play" && !G.over) { msgEl.textContent = ""; msgEl.className = "msg"; }
+        msgTimer = 0;
+      }, 2600);
+    }
+  }
+
+  var flashTimer = 0, flashEl = null;
+  function flashTile(x, y) {
+    var el = tileEls[y * G.map.w + x];
+    if (!el) return;
+    if (flashEl) flashEl.classList.remove("flash");
+    if (flashTimer) clearTimeout(flashTimer);
+    el.classList.remove("flash");
+    void el.offsetWidth;
+    el.classList.add("flash");
+    flashEl = el;
+    flashTimer = setTimeout(function () {
+      if (flashEl) flashEl.classList.remove("flash");
+      flashEl = null; flashTimer = 0;
+    }, 360);
+  }
+
+  /* ---------------- screens ---------------- */
+  function show(name) {
+    G.screen = name;
+    for (var k in screens) {
+      if (Object.prototype.hasOwnProperty.call(screens, k)) screens[k].hidden = k !== name;
+    }
+    if (name !== "play") closeModal(true);
+  }
+
+  /* ---------------- level flow ---------------- */
+  function startLevel(idx) {
+    closeModal(true);
+    G.levelIndex = idx;
+    G.map = MAPS[idx];
+    G.ghosts = [];
+    G.totalTurns = 0;
+    G.loopsUsed = 1;
+    G.over = false;
+    resetLoop();
+    show("play");
+    buildBoard();
+    buildTokens();
+    render();
+    if (typeof window.requestAnimationFrame === "function") window.requestAnimationFrame(layout);
+    say(G.map.hint, null, true);
+  }
+
+  function resetLoop() {
+    G.bodies = [{ x: G.map.start.x, y: G.map.start.y }];
+    G.ghostIdx = [];
+    for (var i = 0; i < G.ghosts.length; i++) {
+      G.bodies.push({ x: G.map.start.x, y: G.map.start.y });
+      G.ghostIdx.push(0);
+    }
+    G.recording = [];
+    G.turn = 0;
+  }
+
+  function doAction(action) {
+    if (G.screen !== "play" || G.over || G.modal) return;
+    var res = tryTurn(action);
+    if (!res.ok) {
+      flashTile(res.x, res.y);
+      say("Blocked. " + res.reason + " The turn is not spent.", "bad");
+      render();
+      return;
+    }
+    render();
+    if (G.map.tiles[G.bodies[0].y][G.bodies[0].x].kind === "exit") { win(); return; }
+    if (G.turn >= G.map.turnLimit) {
+      if (G.map.par - G.loopsUsed <= 0) { lose("You ran out of turns, and there are no loops left."); }
+      else { rewind(true); }
+      return;
+    }
+    say("", null, false);
+  }
+
+  function rewind(auto) {
+    if (G.over || G.modal) return;
+    if (G.map.par - G.loopsUsed <= 0) {
+      say("No loops remain — restart the level to try a new plan.", "bad");
+      return;
+    }
+    if (!auto && G.turn === 0) {
+      say("Nothing recorded yet. Take a turn first, or restart the level.", "bad");
+      return;
+    }
+    G.ghosts.push(G.recording.slice());
+    G.loopsUsed++;
+    resetLoop();
+    buildTokens();
+    render();
+    var n = G.ghosts.length;
+    say((auto ? "Turn limit reached — the loop snaps back. " : "Rewound. ") +
+        n + (n === 1 ? " ghost now replays" : " ghosts now replay") + " beside you. Loop " +
+        G.loopsUsed + " of " + G.map.par + ".", null, true);
+  }
+
+  function restartLevel() {
+    if (G.screen !== "play") return;
+    closeModal(true);
+    startLevel(G.levelIndex);
+    say("Level restarted.", null, true);
+  }
+
+  function bestOf(idx) { return mem.best[idx] || null; }
+  function fmtBest(b) {
+    if (!b) return "—";
+    return b.loops + (b.loops === 1 ? " loop" : " loops") + ", " + b.turns + " turns";
+  }
+
+  function win() {
+    G.over = true;
+    var idx = G.levelIndex, m = G.map;
+    var result = { loops: G.loopsUsed, turns: G.totalTurns };
+    var prev = bestOf(idx), improved = false;
+    if (!prev || result.loops < prev.loops || (result.loops === prev.loops && result.turns < prev.turns)) {
+      mem.best[idx] = result; improved = true;
+    }
+    if (mem.unlocked < idx + 1 && idx + 1 < LEVELS.length) mem.unlocked = idx + 1;
+    if (idx === LEVELS.length - 1) mem.unlocked = LEVELS.length - 1;
+    saveSave();
+    render();
+    var last = idx === LEVELS.length - 1;
+    var scores = { loops: result.loops, par: m.par, turns: result.turns, best: fmtBest(mem.best[idx]) };
+    var buttons = [];
+    if (last) {
+      buttons.push({ label: "See the ending", cls: "btn primary wide", fn: showEnding });
+    } else {
+      buttons.push({ label: "Next level", cls: "btn primary wide", fn: function () { startLevel(idx + 1); } });
+    }
+    buttons.push({ label: "Retry this level", cls: "btn wide", fn: function () { startLevel(idx); } });
+    buttons.push({ label: "Back to levels", cls: "btn ghosty wide", fn: function () { closeModal(true); show("levels"); renderLevels(); } });
+    openModal({
+      icon: "✨",
+      title: "Level complete",
+      text: improved ? "A new personal best for this room." :
+        (result.loops <= m.par ? "Solved inside par." : "Solved."),
+      scores: scores,
+      buttons: buttons
+    });
+    liveEl.textContent = "Level complete. " + result.loops + " loops, par " + m.par + ", " + result.turns + " turns.";
+  }
+
+  function lose(why) {
+    G.over = true;
+    render();
+    var idx = G.levelIndex;
+    openModal({
+      icon: "⏳",
+      title: "Out of loops",
+      text: why + " The timeline will not stretch any further — but nothing stops you starting over.",
+      buttons: [
+        { label: "Retry level", cls: "btn primary wide", fn: function () { startLevel(idx); } },
+        { label: "Back to levels", cls: "btn ghosty wide", fn: function () { closeModal(true); show("levels"); renderLevels(); } }
+      ]
+    });
+    liveEl.textContent = "Out of loops. " + why;
+  }
+
+  function showEnding() {
+    var totalLoops = 0, totalTurns = 0, complete = true, solvedCount = 0, i, b;
+    for (i = 0; i < LEVELS.length; i++) {
+      b = bestOf(i);
+      if (!b) { complete = false; continue; }
+      solvedCount++;
+      totalLoops += b.loops; totalTurns += b.turns;
+    }
+    var parSum = 0;
+    for (i = 0; i < MAPS.length; i++) parSum += MAPS[i].par;
+    G.over = true;
+    openModal({
+      icon: "♾️",
+      title: "All levels complete",
+      text: complete
+        ? "Six rooms, and in every one of them you were your own way out. Best runs added up:"
+        : "You have finished the last room. Totals for the levels you have solved so far:",
+      scores: { loops: totalLoops, par: parSum, turns: totalTurns, best: solvedCount + " of " + LEVELS.length + " rooms", bestLabel: "Rooms solved" },
+      buttons: [
+        { label: "Back to levels", cls: "btn primary wide", fn: function () { closeModal(true); show("levels"); renderLevels(); } },
+        { label: "Title screen", cls: "btn ghosty wide", fn: function () { closeModal(true); show("title"); } }
+      ]
+    });
+    liveEl.textContent = "All levels complete. Total " + totalLoops + " loops and " + totalTurns + " turns.";
+  }
+
+  /* ---------------- modal + focus trap ---------------- */
+  function openModal(cfg) {
+    G.modal = cfg;
+    G.lastFocus = document.activeElement;
+    $("ov-icon").textContent = cfg.icon || "";
+    $("ov-title").textContent = cfg.title || "";
+    $("ov-text").textContent = cfg.text || "";
+    var box = $("ov-scores");
+    if (cfg.scores) {
+      box.hidden = false;
+      $("sc-loops").textContent = cfg.scores.loops;
+      $("sc-par").textContent = "of par " + cfg.scores.par;
+      $("sc-turns").textContent = cfg.scores.turns;
+      $("sc-best").textContent = cfg.scores.best;
+      $("sc-best-k").textContent = cfg.scores.bestLabel || "Your best here";
+    } else {
+      box.hidden = true;
+    }
+    var host = $("ov-buttons");
+    host.innerHTML = "";
+    for (var i = 0; i < cfg.buttons.length; i++) {
+      (function (spec) {
+        var b = document.createElement("button");
+        b.className = spec.cls || "btn wide";
+        b.textContent = spec.label;
+        b.addEventListener("click", function () { spec.fn(); });
+        host.appendChild(b);
+      })(cfg.buttons[i]);
+    }
+    ovEl.hidden = false;
+    setInert(true);
+    var first = host.querySelector("button");
+    if (first) first.focus();
+  }
+
+  function closeModal(silent) {
+    if (!G.modal) return;
+    G.modal = null;
+    if (document.activeElement && modalEl.contains(document.activeElement)) {
+      try { document.activeElement.blur(); } catch (e) { /* focus is best effort */ }
+    }
+    ovEl.hidden = true;
+    setInert(false);
+    if (!silent && G.lastFocus && document.contains(G.lastFocus)) {
+      try { G.lastFocus.focus(); } catch (e) { /* focus is best effort */ }
+    }
+    G.lastFocus = null;
+  }
+
+  function setInert(on) {
+    for (var k in screens) {
+      if (Object.prototype.hasOwnProperty.call(screens, k)) {
+        if (on) screens[k].setAttribute("aria-hidden", "true");
+        else screens[k].removeAttribute("aria-hidden");
+      }
+    }
+    var nodes = document.querySelectorAll("#app > section button, #app > section a");
+    for (var i = 0; i < nodes.length; i++) {
+      if (on) nodes[i].setAttribute("tabindex", "-1");
+      else nodes[i].removeAttribute("tabindex");
+    }
+  }
+
+  function trapTab(e) {
+    if (!G.modal) return;
+    var f = modalEl.querySelectorAll("button:not([disabled])");
+    if (!f.length) return;
+    var first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    else if (document.activeElement === document.body) { e.preventDefault(); first.focus(); }
+  }
+
+  function pause() {
+    if (G.screen !== "play" || G.modal || G.over) return;
+    openModal({
+      icon: "⏸️",
+      title: "Paused",
+      text: "Level " + (G.levelIndex + 1) + " · " + G.map.name + ". " + G.map.hint,
+      buttons: [
+        { label: "Resume", cls: "btn primary wide", fn: function () { closeModal(); } },
+        { label: "Restart level", cls: "btn wide", fn: function () { restartLevel(); } },
+        { label: "How to play", cls: "btn ghosty wide", fn: function () { closeModal(true); show("how"); } },
+        { label: "Back to levels", cls: "btn ghosty wide", fn: function () { closeModal(true); show("levels"); renderLevels(); } }
+      ]
+    });
+  }
+
+  /* ---------------- level select ---------------- */
+  function renderLevels() {
+    var host = $("lv-grid");
+    host.innerHTML = "";
+    var solved = 0;
+    for (var i = 0; i < LEVELS.length; i++) {
+      var locked = i > mem.unlocked;
+      var b = bestOf(i);
+      if (b) solved++;
+      var btn = document.createElement("button");
+      btn.className = "btn lvl" + (locked ? " locked" : "") + (b ? " done" : "");
+      btn.disabled = locked;
+      btn.innerHTML =
+        '<span class="n">Level ' + (i + 1) + "</span>" +
+        '<span class="t">' + (locked ? "Locked" : escapeHtml(MAPS[i].name)) + "</span>" +
+        '<span class="b">' + (locked ? "Finish level " + i + " first"
+          : "Best: " + escapeHtml(fmtBest(b)) + " · par " + MAPS[i].par) + "</span>" +
+        '<span class="badge" aria-hidden="true">' + (locked ? "🔒" : (b ? "✔" : "")) + "</span>";
+      btn.setAttribute("aria-label", locked
+        ? "Level " + (i + 1) + ", locked"
+        : "Level " + (i + 1) + ", " + MAPS[i].name + ", par " + MAPS[i].par + ", best " + fmtBest(b));
+      if (!locked) {
+        (function (idx) {
+          btn.addEventListener("click", function () { startLevel(idx); });
+        })(i);
+      }
+      host.appendChild(btn);
+    }
+    $("lv-sub").textContent = solved + " of " + LEVELS.length + " rooms solved." +
+      (storageOK ? "" : " (Progress cannot be saved in this browser, so it lasts only for this visit.)");
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  /* ---------------- input ---------------- */
+  var KEYMAP = {
+    ArrowUp: "U", ArrowDown: "D", ArrowLeft: "L", ArrowRight: "R",
+    w: "U", a: "L", s: "D", d: "R", W: "U", A: "L", S: "D", D: "R"
+  };
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Tab") { trapTab(e); return; }
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (G.modal) {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        if (G.modal.title === "Paused") closeModal();
+      }
+      return;
+    }
+    if (G.screen === "how" || G.screen === "levels") {
+      if (e.key === "Escape") { e.preventDefault(); show("title"); }
+      return;
+    }
+    if (G.screen === "title") {
+      if (e.key === "Enter" && document.activeElement === document.body) { e.preventDefault(); playFromTitle(); }
+      return;
+    }
+    if (G.screen !== "play") return;
+    var k = KEYMAP[e.key];
+    if (k) { e.preventDefault(); doAction(k); return; }
+    if (e.key === " " || e.key === "Spacebar") {
+      var tag = document.activeElement && document.activeElement.tagName;
+      if (tag === "BUTTON") return;
+      e.preventDefault(); doAction("W"); return;
+    }
+    if (e.key === "Enter") {
+      if (document.activeElement && document.activeElement.tagName === "BUTTON") return;
+      e.preventDefault(); rewind(false); return;
+    }
+    if (e.key === "Backspace") { e.preventDefault(); restartLevel(); return; }
+    if (e.key === "Escape") { e.preventDefault(); pause(); return; }
+  });
+
+  function bind(id, fn) {
+    var el = $(id);
+    if (el) el.addEventListener("click", fn);
+  }
+  /* pointer clicks hand focus back to the board so Space and Enter stay game keys */
+  function bindPlay(id, fn) {
+    var el = $(id);
+    if (!el) return;
+    el.addEventListener("click", function (e) {
+      if (e.detail > 0) el.blur();
+      fn();
+    });
+  }
+  bindPlay("b-up", function () { doAction("U"); });
+  bindPlay("b-down", function () { doAction("D"); });
+  bindPlay("b-left", function () { doAction("L"); });
+  bindPlay("b-right", function () { doAction("R"); });
+  bindPlay("b-wait", function () { doAction("W"); });
+  bindPlay("b-rewind", function () { rewind(false); });
+  bindPlay("b-restart", function () { restartLevel(); });
+  bindPlay("b-pause", function () { pause(); });
+
+  function playFromTitle() {
+    var idx = Math.max(0, Math.min(LEVELS.length - 1, mem.unlocked));
+    startLevel(idx);
+  }
+  bind("b-play", playFromTitle);
+  bind("b-how", function () { show("how"); });
+  bind("b-levels", function () { renderLevels(); show("levels"); });
+  bind("b-how-back", function () { show("title"); });
+  bind("b-how-back2", function () { show("title"); });
+  bind("b-how-play", playFromTitle);
+  bind("b-lv-back", function () { show("title"); });
+  bind("b-wipe", function () {
+    mem = { unlocked: 0, best: {} };
+    try { window.localStorage.removeItem(STORE_KEY); } catch (e) { storageOK = false; }
+    renderLevels();
+  });
+
+  /* swipe */
+  var sx = 0, sy = 0, swiping = false;
+  boardEl.addEventListener("touchstart", function (e) {
+    if (e.touches.length !== 1) { swiping = false; return; }
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY; swiping = true;
+  }, { passive: true });
+  boardEl.addEventListener("touchend", function (e) {
+    if (!swiping) return;
+    swiping = false;
+    var t = e.changedTouches && e.changedTouches[0];
+    if (!t) return;
+    var dx = t.clientX - sx, dy = t.clientY - sy;
+    var ax = Math.abs(dx), ay = Math.abs(dy);
+    if (Math.max(ax, ay) < 24) return;
+    doAction(ax > ay ? (dx > 0 ? "R" : "L") : (dy > 0 ? "D" : "U"));
+  }, { passive: true });
+
+  var rTimer = 0;
+  window.addEventListener("resize", function () {
+    if (rTimer) clearTimeout(rTimer);
+    rTimer = setTimeout(function () { rTimer = 0; layout(); }, 80);
+  });
+  window.addEventListener("orientationchange", function () { layout(); });
+  if (typeof window.ResizeObserver === "function") {
+    new window.ResizeObserver(function () { layout(); }).observe(boardWrap);
+  }
+
+  /* ---------------- boot ---------------- */
+  loadSave();
+  renderLevels();
+  show("title");
+})();
+</script>

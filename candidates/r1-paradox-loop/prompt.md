@@ -64,7 +64,9 @@ limit remaining, loops remaining and a ghost count.
 
 ## 5. Hard technical constraints
 
-- Exactly one file: `index.html`, with all CSS and JS inline in it.
+- Exactly one file: `index.html`, with all CSS and JS inline in it. It must be a **complete HTML
+  document** — `<!DOCTYPE html>`, `<html lang="en">`, `<head>`, `<body>`, all closed. A fragment that
+  merely happens to render is a failure: without the doctype the browser falls into quirks mode.
 - **Zero network.** No CDN, no web fonts, no images, no audio files, no `fetch`/`XMLHttpRequest`/WebSocket,
   no `import`. Do not reference any `http://` or `https://` URL anywhere. Use a system font stack.
 - **No `<script type="module">`** — modules are blocked under `file://`. One plain inline script.
