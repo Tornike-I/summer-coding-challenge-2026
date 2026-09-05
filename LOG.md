@@ -12,6 +12,7 @@ Blind judge, one sub-agent per build. Each saw only the rubric, that build's `pr
 |---|:--:|:--:|:--:|:--:|:--:|:--:|
 | `r1-bloom/run-1` | 5 | 4 | 4 | 4 | 4 | **4.25** |
 | `r1-bloom/run-2` | 5 | 4 | 4 | 4 | 5 | **4.35** |
+| `r1-districts/run-2` | 5 | 4 | 4 | 4 | 4 | **4.25** |
 
 ### `r1-bloom/run-1` — 4.25
 The judge independently re-implemented the shipped Life rule and ran all six stored reference
@@ -56,4 +57,30 @@ accident.
 Both Bloom judges independently capped originality at 4 with the same reasoning — Conway is the most
 familiar automaton a developer jury will be shown, so the novelty sits in the wrapper, not the
 simulation. That is a ceiling no amount of polish moves.
+
+### `r1-districts/run-2` — 4.25
+
+The judge wrote its own brute-force partition solver, independently confirmed all five boards admit a
+legal Teal-majority map, fed those solutions back into the live game, and watched it accept every one
+and roll to a real ending screen with an empty console — including under a `data:` origin where
+`localStorage` genuinely throws, which the game absorbs and honestly reports to the player.
+
+The prompt instruction that paid off here: *write and run a throwaway brute force proving every level
+winnable, then delete it.* It demonstrably worked. Same shape as Bloom's backwards-design trick — give
+the agent a procedure, not an assertion.
+
+- **Originality 4**, and for a reason that matters: gerrymandering explainer/puzzle demos are
+  recognisable prior art. Fresh *execution* of an idea some jurors will already have met.
+- **Biggest weakness**: the desktop presentation. The whole game is a 640px phone-shaped column adrift
+  in a 1440px viewport, and the title screen's left-aligned block reads as a mis-centred accident
+  rather than a choice. Designed as a phone that merely tolerates a desktop.
+- **Highest-leverage fix**: a ≥900px layout putting the board beside the status/chips/controls column,
+  and focus the grid on entering a level so arrow keys work without hunting for Tab.
+- Craft the judge singled out: district outlines that round only where a region actually turns,
+  a live-region flip trick so repeated announcements re-fire, refusal messages that name the offending
+  district, and a 7×7 board landing on exactly 44px cells at 375×667.
+- **Prompt** docked the same point as Bloom's: section 8's checklist restates sections 5–7 near-verbatim.
+- **Reproducibility** risk named: the winnability guarantee leans on the agent actually running a
+  solver, and the prompt's "or trace it by hand" fallback is the one path that could ship an
+  unwinnable finale.
 
