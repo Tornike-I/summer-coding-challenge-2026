@@ -13,6 +13,7 @@ Blind judge, one sub-agent per build. Each saw only the rubric, that build's `pr
 | `r1-bloom/run-1` | 5 | 4 | 4 | 4 | 4 | **4.25** |
 | `r1-bloom/run-2` | 5 | 4 | 4 | 4 | 5 | **4.35** |
 | `r1-districts/run-2` | 5 | 4 | 4 | 4 | 4 | **4.25** |
+| `r1-districts/run-1` | 5 | 4 | 4 | 4 | 4 | **4.25** |
 
 ### `r1-bloom/run-1` — 4.25
 The judge independently re-implemented the shipped Life rule and ran all six stored reference
@@ -83,4 +84,63 @@ the agent a procedure, not an assertion.
 - **Reproducibility** risk named: the winnability guarantee leans on the agent actually running a
   solver, and the prompt's "or trace it by hand" fallback is the one path that could ship an
   unwinnable finale.
+
+### `r1-districts/run-1` — 4.25
+
+Identical scores to run-2 in every area — the strongest reproducibility signal in the round, since two
+judges who never saw each other's work scored two independent builds of one prompt the same way.
+This judge also brute-forced all five boards, confirmed the advertised vote totals are exact
+(including the deliberate 9-cell solid Amber corner in level 4), and walked every edge case the
+prompt itself enumerates without finding a failure.
+
+Singled out for praise: **contiguity being unbreakable by construction rather than validated after
+the fact**. That was a deliberate prompt choice and it is the one carrying the build.
+
+- **This judge found a real bug in my prompt**: section 2 says the board is "5×5 up to 7×7", then the
+  level list specifies a 4×4 level 1. A flat self-contradiction, and it cost a point on prompt quality.
+  Free fix.
+- **Concrete defect in the build**: `aria-modal` overlays neither trap focus nor make the background
+  inert, and U/R only fire while the board itself has focus. Stands out because the rest of the
+  accessibility work is deliberate.
+- **The ceiling, stated plainly**: "it renders a well-known real-world concept faithfully and adds
+  nothing on top of it, so the later levels are the same insight at larger scale." Once the player has
+  the level-3 "wait, that works?" moment, the rest is more of the same at larger size.
+
+---
+
+## Round 1 — result
+
+| candidate | run-1 | run-2 | spread | verdict |
+|---|:--:|:--:|:--:|---|
+| `r1-bloom` | 4.25 | 4.35 | 0.10 | strong, one soft ceiling |
+| `r1-districts` | 4.25 | 4.25 | 0.00 | strong, one hard ceiling |
+| `r1-paradox-loop` | — | — | — | regenerating; no build existed in round 1 |
+
+**Both surviving candidates converged on 4.25–4.35 and both lost the same point in the same place:
+originality.** Four judges, four independent 4s, four different justifications that reduce to one
+sentence — *this is excellent execution of an idea a developer jury has already met*. Nothing about
+the builds fixes that; only a different idea does.
+
+### What every judge agreed on
+1. **Originality 4, never 5.** Conway's Life and gerrymandering are both prior art to this audience.
+2. **Prompt quality 4, docked for the same repetition** — section 8's checklist restates sections 5–7
+   near-verbatim. Both prompts, four judges, same complaint.
+3. **Theme + runs 5.** Every build ran clean, handled its edge cases and survived storage failure.
+4. **The procedure instructions are what made the builds trustworthy** — "design levels backwards from
+   a verified seed" and "write and run a brute-force solver, then delete it". Both demonstrably
+   executed. This is the transferable finding of the round: *give the agent a procedure, not an
+   assertion.*
+
+### Changes for round 2 — one class of change per candidate
+- **`r1-districts` — originality is a hard ceiling. Drop it.** Two judges independently said the idea
+  adds nothing on top of a known concept and that the back half is the same insight at larger scale.
+  Polishing a 4 into a 4 is not worth a round. Per the brief: swap in a fallback rather than polish a
+  weak idea.
+- **`r1-bloom` — economy pass only.** 8 630 chars is the longest prompt and the checklist is the
+  redundant part every judge named. Cut section 8 down to the lines not already stated, fix nothing
+  else, and see whether prompt quality moves 4 → 5 in isolation.
+- **`r1-paradox-loop` — judge the regenerated builds first.** It is the only candidate whose mechanic
+  no judge has called prior art, so it is the only one with a live shot at originality 5.
+- **Both prompts carry a fixable defect**: Districts' "5×5 up to 7×7" versus its 4×4 level 1. If
+  Districts is revived, that goes first.
 
