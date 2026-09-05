@@ -144,3 +144,22 @@ the builds fixes that; only a different idea does.
 - **Both prompts carry a fixable defect**: Districts' "5×5 up to 7×7" versus its 4×4 level 1. If
   Districts is revived, that goes first.
 
+## Paradox Loop — second failed generation attempt (2026-09-05 13:18)
+
+Both regeneration agents died on a session rate limit before writing a usable file. run-1 left a
+3 115-byte stub; run-2 wrote nothing, though its last words were substantive — it had found that
+*"levels 3 and 4 had connectivity leaks (the exit was reachable without the door)"* and was building a
+staged verifier to fix them.
+
+That is now **two attempts, zero builds** — once killed by me, once by the rate limit. Neither failure
+is the prompt's fault, but the pattern is worth recording: Paradox Loop asks for more implementation
+than either other candidate (ghost recording and replay, six levels, a solvability proof per level),
+so it runs longest and is the most exposed to any interruption. **Under the contest's real 60-minute
+cap that is a genuine risk, not just an inconvenience here.** If the third attempt also runs long,
+that is evidence about the prompt and not about my infrastructure.
+
+The run-2 agent's own finding — that its generated levels had connectivity leaks letting the player
+reach the exit without opening the door — is exactly the failure the "prove every level is solvable"
+instruction is meant to catch, and it caught it. Same procedure-not-assertion pattern that worked for
+Bloom and Districts.
+
