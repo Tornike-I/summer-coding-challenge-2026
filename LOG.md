@@ -196,3 +196,36 @@ One more Paradox Loop run, with a line requiring a complete HTML document. **If 
 produce a valid, complete build, Paradox Loop is dropped and Bloom becomes the submission.** Bloom
 already has two judged builds at 4.25 and 4.35 and a revised round-2 prompt ready to run.
 
+## Paradox Loop — attempt four: a real build (2026-09-05 21:24)
+
+46 933 bytes, one file, **25/25 automated checks**, and independently confirmed by me:
+`compatMode: "CSS1Compat"`, doctype present, `lang="en"`. The quirks-mode defect is gone. Single
+agent this time rather than two, and the "write a valid skeleton to disk first, then grow the game
+inside it" instruction did its job.
+
+What the agent reports having verified — worth recording because most of it is the kind of claim the
+earlier attempts could not make:
+- It wrote a throwaway solver that **loaded the shipped engine out of `index.html`** and checked every
+  level, then deleted it. Six levels, each machine-checked: solved within par and turn limit; exit
+  **not** reachable with doors treated as walls; not solvable alone in one loop for levels 2–6; solid
+  border; every door colour has a plate.
+- A breadth-first search over all loop-1 endings confirms **level 6 genuinely cannot be done in two
+  loops** — the finale really does need two ghosts. That is the design intent proven, not asserted.
+- Its test browser served the page from an opaque origin where `localStorage` throws `SecurityError`,
+  so the storage-failure path was the *default* environment, and it separately fed the loader
+  malformed JSON, arrays, junk, negatives, `Infinity` and a prototype-pollution payload — all treated
+  as absent, nothing thrown.
+
+Two rule decisions it made that the prompt did not specify, both defensible:
+- **Doors evaluate power after the mover moves**, so you cannot stand on the only lit plate and step
+  through its own door. Without this, levels 2 and 4 collapse. This is a genuine gap in my spec.
+- **All bodies start stacked on the start tile**, rendered offset, with no-sharing applying the moment
+  anyone steps off. Also a gap in my spec — I never said where a ghost stands on turn 0.
+
+Bugs it found and fixed during its own testing, none of which the automated checks would have caught:
+a side panel auto-placing into a phantom third column and squeezing the board to 364px at 1440px;
+board sizing deferred to `requestAnimationFrame`, which never fires in a background tab, leaving the
+grid collapsed; floor and wall tiles nearly indistinguishable; open doors rendering as black pits.
+
+**Paradox Loop survives the stop rule.** Going to blind judging.
+
