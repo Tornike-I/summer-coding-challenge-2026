@@ -10,9 +10,13 @@ Deadline 7 September 2026. Scoring: 25 % theme + runs, 25 % originality, 20 % UX
 
 ## Status
 
-**The tuning loop was stopped part-way through round 1.** Nothing here is a finished submission — `FINAL/`
-is empty and no blind judging was run. What exists is the rule extraction, the concept work, three
-candidate prompts, five generation runs (four complete), and the validation tooling.
+**Stopped by request during round 2, with a submittable package assembled.** `FINAL/` holds all three
+finished games — prompt and raw build together — plus `meta.md`, a Czech-first `description.md` and a
+`REPORT.md` that names which one to submit and what to check first.
+
+Five builds were judged blind, one agent each: **Bloom 4.35** (the one to submit), Districts 4.25,
+Paradox Loop 3.75. Round 2 was cut short — `candidates/r2-bloom/` holds a revised prompt and one
+validated but **unjudged** build.
 
 ## Layout
 
@@ -31,7 +35,7 @@ tools/validate.js           25 automated checks per run (Playwright + headless C
 tools/checkprompt.js        prompt compliance: length, code fences, base64, data URIs
 tools/judge-brief.md        rubric handed to a blind judging agent
 page.txt / terms.txt        source-of-truth text pulled in Step 0
-FINAL/                      submission package — empty, never assembled
+FINAL/                      submission package — three games, docs, verified working
 ```
 
 ## Candidates
@@ -56,8 +60,8 @@ was somewhere in its own self-verification or polish phase rather than finished 
 | `r1-bloom/run-2` | complete file | 25 / 25 |
 | `r1-districts/run-1` | complete file | 25 / 25 |
 | `r1-districts/run-2` | complete file | 25 / 25 |
-| `r1-paradox-loop/run-1` | truncated — cut off just after `<body>` | not run |
-| `r1-paradox-loop/run-2` | no file written yet | — |
+| `r1-paradox-loop/run-1` | complete file, on the fourth attempt | 25 / 25 |
+| `r2-bloom/run-1` | complete file, agent died mid-fix — unjudged | 25 / 25 |
 
 The four complete builds each pass all 25 checks: one file only, no remote URLs, no ES modules, no
 `fetch`/XHR/WebSocket, no encoded asset blobs, clean console (no errors, exceptions or warnings), no
