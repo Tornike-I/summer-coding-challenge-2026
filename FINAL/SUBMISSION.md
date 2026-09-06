@@ -5,7 +5,7 @@ proběhnout samostatně bez pomoci jiných osob."* — the form must be complete
 from anyone else. It also wants your own contact details. So this page is everything ready to paste; the
 submitting is yours.
 
-Form: https://docs.google.com/forms/d/e/1FAIpQLSfUiIbd515AAsc9NG3x_ryi9anWXzoKD0pJFQEomQ/viewform
+Form: https://docs.google.com/forms/d/e/1FAIpQLSfUiIbd515AAsc9NG3x_ryi9anWXzoKD0pJFQOH3sDJgKEomQ/viewform
 Deadline: **7 September 2026.**
 
 ---

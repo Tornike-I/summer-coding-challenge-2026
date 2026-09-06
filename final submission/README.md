@@ -1,24 +1,47 @@
 # Final submission — Bloom
 
 Summer Coding Challenge 2026 (profiq), theme **MINIHRA**. One prompt, one game, one file.
-Deadline **7 September 2026** · [submission form](https://docs.google.com/forms/d/e/1FAIpQLSfUiIbd515AAsc9NG3x_ryi9anWXzoKD0pJFQEomQ/viewform)
+Deadline **7 September 2026** · [submission form](https://docs.google.com/forms/d/e/1FAIpQLSfUiIbd515AAsc9NG3x_ryi9anWXzoKD0pJFQOH3sDJgKEomQ/viewform)
 
-## Upload these two, exactly as they are
+## The form takes URLs, not files
 
-| | file | |
+There is **no file upload on the form** and no zip. It asks for two links, so both files have to be
+hosted somewhere public first. Fields, in order:
+
+| # | field | what goes in |
 |---|---|---|
-| 1 | **`prompt.md`** | 9 580 characters, under the 10 000 cap |
-| 2 | **`index.html`** | 53 707 bytes, raw agent output |
+| 1 | E‑mail | yours |
+| 2 | **Výsledek úkolu (URL tvého index.html)** | public link to `index.html` |
+| 3 | **Řešení úkolu (URL tvého prompt.md)** | public link to `prompt.md` |
+| 4 | **Popis aplikace, název AI agenta, použitý tooling, verze modelu a…** | one paragraph — paste [`form-answer.md`](form-answer.md) |
+| 5–7 | Jméno, Příjmení, Telefon | yours |
+| 8–9 | two consent checkboxes | your call |
 
-**Do not open either in an editor and save.** `index.html` is the unmodified output of a single
-autonomous run and must stay byte-for-byte what the agent wrote — even a stray trailing newline breaks
-the rule. Both files are verified identical to `../candidates/r3-bloom/`.
+Field 4 is a **single** paragraph box covering both the description and the agent details, which is why
+`form-answer.md` merges them. `description.md` and `meta.md` hold the longer standalone versions.
 
-## The other two form fields
+Signing in with a Google account is required.
 
-- **Agent, tooling, model, settings** → paste from [`meta.md`](meta.md)
-- **Short description of the app and its functionality** → paste from [`description.md`](description.md)
-  (Czech first, English underneath)
+## Hosting the two files
+
+Whatever you choose, the link for field 2 should ideally **render the game**, not show its source — the
+judges open it in a clean browser profile. A `raw.githubusercontent.com` link serves HTML as plain text,
+so it shows code rather than a playable game.
+
+- **GitHub Pages** on a public repo gives `https://<user>.github.io/<repo>/index.html`, which plays. Best
+  option for field 2.
+- **A public gist** works for field 3 (`prompt.md` renders fine as text) but not well for field 2.
+- The current repo is **private**, so its links will 404 for the judges.
+
+## The two files
+
+| file | |
+|---|---|
+| **`index.html`** | 53 707 bytes, raw agent output, byte-identical to `../candidates/r3-bloom/run-1/` |
+| **`prompt.md`** | 9 580 characters, the exact prompt that produced it |
+
+**Never open `index.html` in an editor and save.** It must stay byte-for-byte what the agent wrote.
+Copying, uploading and serving it are all fine; re-saving is not.
 
 ## What the game is
 
@@ -50,4 +73,9 @@ Full detail in [`checks.md`](checks.md). The reasoning that got here is in [`../
 
 This build was never blind-judged. Its predecessor scored **4.35** weighted, and every change since went
 in a direction the judges asked for — but the primer's effect is a question of feel. **Play it once before
-you upload.**
+you submit.**
+
+## Rule 4
+
+*"Vyplnění soutěžního formuláře musí proběhnout samostatně bez pomoci jiných osob."* The form has to be
+filled in by you, without help. Everything here is staged for pasting; the submitting is yours.
