@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="Paradox Loop - a turn-based puzzle where you rewind time and play beside the ghosts of your own past attempts.">
+<title>Paradox Loop</title>
+<style>
+:root{
+  --bg:#0d1017; --bg2:#141926; --bg3:#1b2233; --line:#28314a;
+  --txt:#e8ebf5; --muted:#98a2bd; --dim:#6b7593;
+  --you:#57dcff; --you-dark:#0a3a4a;
+  --ghost:#ffab5e; --ghost-dark:#3d2a16;
+  --c1:#ff6f9c; --c2:#a5e85c;
+  --warn:#ff6b6b; --ok:#7be0a8;
+  --r:12px; --rs:8px;
+  --gap:clamp(8px,1.6vw,16px);
+  --fs:clamp(14px,0.55rem + 1.1vw,17px);
+  --ff:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans",sans-serif;
+  --dur:0.14s;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0}
+html{height:100%}
+body{
+  height:100dvh;overflow:hidden;
+  background:
+    radial-gradient(1200px 700px at 15% -10%,#182036 0%,transparent 60%),
+    radial-gradient(900px 600px at 110% 110%,#1a1630 0%,transparent 60%),
+    var(--bg);
+  color:var(--txt);font-family:var(--ff);font-size:var(--fs);line-height:1.45;
+  -webkit-text-size-adjust:100%;
+}
+#app{height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+.scr{flex:1;min-height:0;display:none;flex-direction:column;overflow:hidden}
+.scr.on{display:flex}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
+h1,h2,h3{margin:0;line-height:1.15;font-weight:650;letter-spacing:-0.01em}
+h1{font-size:clamp(28px,7vw,52px)}
+h2{font-size:clamp(19px,3.4vw,26px)}
+h3{font-size:clamp(15px,2vw,18px)}
+p{margin:0}
+ul{margin:0;padding-left:1.1em}
+button{font:inherit;color:inherit;font-weight:600;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+:focus-visible{outline:3px solid var(--you);outline-offset:2px;border-radius:6px}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:0.5em;
+  min-height:46px;min-width:46px;padding:0.6em 1.15em;border-radius:var(--r);
+  background:var(--bg3);border:1px solid var(--line);color:var(--txt);
+  transition:background var(--dur) ease,transform var(--dur) ease,border-color var(--dur) ease;
+}
+.btn:hover{background:#232c42;border-color:#3a4666}
+.btn:active{transform:translateY(1px)}
+.btn[disabled]{opacity:0.42;cursor:not-allowed}
+.btn.pri{background:linear-gradient(180deg,#5fe0ff,#2bb6db);color:#04222d;border-color:#7febff}
+.btn.pri:hover{background:linear-gradient(180deg,#79e7ff,#39c3e8)}
+.btn.gho{background:transparent}
+.btn.sm{min-height:44px;padding:0.45em 0.8em;font-size:0.92em}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.center{align-items:center;justify-content:center;text-align:center}
+.scroll{overflow-y:auto;overflow-x:hidden;min-height:0;flex:1}
+.card{background:linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0));border:1px solid var(--line);border-radius:var(--r);padding:var(--gap)}
+.muted{color:var(--muted)}
+.tiny{font-size:0.84em}
+.head{display:flex;align-items:center;gap:12px;padding:var(--gap);padding-bottom:0;flex:none}
+.head h2{margin-right:auto}
+.inner{padding:var(--gap);display:flex;flex-direction:column;gap:var(--gap);max-width:900px;width:100%;margin:0 auto}
+
+/* ---------- title ---------- */
+#s-title{overflow-y:auto}
+#s-title .wrap{margin:auto;max-width:640px;width:100%;padding:var(--gap);text-align:center;display:flex;flex-direction:column;gap:clamp(10px,2.2vh,20px);align-items:center}
+.logo{display:flex;align-items:center;gap:0.5em;justify-content:center}
+.logo svg{width:clamp(34px,8vw,50px);height:clamp(34px,8vw,50px);flex:none}
+.hook{color:var(--muted);max-width:46ch}
+#s-title .row{justify-content:center}
+.vign{display:flex;gap:8px;justify-content:center;margin-top:2px}
+.vign i{width:24px;height:24px;border-radius:7px;background:var(--bg3);border:1px solid var(--line);display:block}
+.vign i.you{background:var(--you);box-shadow:0 0 16px rgba(87,220,255,0.5);border-color:transparent}
+.vign i.g1{background:var(--ghost);opacity:0.5;border-color:transparent}
+.vign i.g2{background:var(--ghost);opacity:0.3;border-color:transparent}
+
+/* ---------- how to ---------- */
+.steps{display:grid;gap:var(--gap);grid-template-columns:repeat(auto-fit,minmax(215px,1fr))}
+.step{display:flex;flex-direction:column;gap:10px}
+.step .n{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--you);color:#04222d;font-weight:800;font-size:13px}
+.mini{display:grid;gap:3px;background:#0b0e16;border:1px solid var(--line);border-radius:var(--rs);padding:6px;width:max-content}
+.mini .r{display:flex;gap:3px}
+.mini .t{width:20px;height:20px;border-radius:5px;background:#1a2133;position:relative}
+.mini .t.w{background:repeating-linear-gradient(135deg,#101725 0 5px,#0d1320 5px 10px)}
+.mini .t.you{background:var(--you)}
+.mini .t.gh{background:var(--ghost);opacity:0.5}
+.mini .t.ex{box-shadow:inset 0 0 0 2px var(--ok)}
+.mini .t.p1::after{content:"";position:absolute;inset:4px;border-radius:50%;border:2px solid var(--c1)}
+.mini .t.d1{background:repeating-linear-gradient(90deg,var(--c1) 0 2px,rgba(255,111,156,0.18) 2px 6px);box-shadow:inset 0 0 0 2px var(--c1)}
+.mini .t.d1o{background:transparent;box-shadow:inset 0 0 0 2px rgba(255,111,156,0.35)}
+.legend{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+.lg{display:flex;align-items:center;gap:9px;font-size:0.9em}
+.lg .sw{width:22px;height:22px;border-radius:6px;flex:none;position:relative;background:#1a2133}
+.lg .sw.you{background:var(--you)}
+.lg .sw.gh{background:var(--ghost);opacity:0.5}
+.lg .sw.p1::after{content:"";position:absolute;inset:4px;border-radius:50%;border:2px solid var(--c1)}
+.lg .sw.p2::after{content:"";position:absolute;inset:4px;border-radius:3px;transform:rotate(45deg);border:2px solid var(--c2)}
+.lg .sw.ex{box-shadow:inset 0 0 0 2px var(--ok)}
+
+/* ---------- level select ---------- */
+.lvgrid{display:grid;gap:var(--gap);grid-template-columns:repeat(auto-fill,minmax(155px,1fr))}
+.lvcard{display:flex;flex-direction:column;align-items:flex-start;gap:5px;text-align:left;padding:14px;border-radius:var(--r);background:var(--bg2);border:1px solid var(--line);min-height:108px}
+.lvcard:hover:not([disabled]){background:#1d2437;border-color:#3a4666}
+.lvcard .no{font-size:0.78em;letter-spacing:0.13em;text-transform:uppercase;color:var(--dim)}
+.lvcard .nm{font-size:1.02em}
+.lvcard .bs{color:var(--muted);font-size:0.85em;font-weight:500;margin-top:auto}
+.lvcard[disabled]{color:var(--dim);opacity:0.62}
+.lvcard .done{color:var(--ok)}
+
+/* ---------- game ---------- */
+#s-game.on{display:grid;gap:var(--gap);padding:var(--gap);
+  grid-template-rows:auto minmax(0,1fr) auto;grid-template-columns:minmax(0,1fr);
+  grid-template-areas:"bar" "board" "ctl"}
+#bar{grid-area:bar}
+#boardwrap{grid-area:board;min-height:0;min-width:0;display:grid;place-items:center}
+#side{grid-area:ctl;display:flex;flex-direction:column;gap:10px;min-width:0}
+#sidecard{display:none}
+@media (min-width:840px) and (min-height:430px){
+  #s-game.on{grid-template-columns:minmax(0,1fr) clamp(248px,25vw,320px);
+    grid-template-rows:auto minmax(0,1fr);
+    grid-template-areas:"bar ctl" "board ctl";
+    max-width:1360px;width:100%;margin:0 auto}
+  #side{gap:var(--gap);overflow-y:auto}
+  #sidecard{display:flex;flex-direction:column;gap:8px}
+}
+#bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:var(--bg2);border:1px solid var(--line);border-radius:var(--r);padding:7px 10px}
+.stat{display:flex;flex-direction:column;line-height:1.12;padding:2px 10px;border-left:1px solid var(--line)}
+.stat b{font-size:1.05em;font-variant-numeric:tabular-nums}
+.stat span{font-size:0.7em;letter-spacing:0.08em;text-transform:uppercase;color:var(--dim);font-weight:600}
+.stat.low b{color:var(--warn)}
+#lvname{font-weight:650;margin-right:auto;display:flex;flex-direction:column;line-height:1.15;padding-right:6px}
+#lvname small{color:var(--dim);font-weight:600;font-size:0.7em;letter-spacing:0.08em;text-transform:uppercase}
+
+#board{position:relative;display:grid;gap:3px;padding:8px;border-radius:var(--r);
+  background:#080b12;border:1px solid var(--line);box-shadow:0 18px 50px -24px #000;
+  grid-template-columns:repeat(var(--cols),var(--tile));
+  grid-template-rows:repeat(var(--rows),var(--tile));
+  touch-action:none;user-select:none;-webkit-user-select:none}
+.tile{width:var(--tile);height:var(--tile);border-radius:calc(var(--tile)/6);position:relative;
+  background:#212b40;box-shadow:inset 0 1px 0 rgba(255,255,255,0.045)}
+.tile.wall{background:repeating-linear-gradient(135deg,#0b1019 0 7px,#080c13 7px 14px);box-shadow:inset 0 0 0 1px #151d2e}
+.tile.start{box-shadow:inset 0 0 0 2px #3d4a6d}
+.tile.start::after{content:"";position:absolute;inset:27%;border-radius:50%;border:2px dashed #5a6b96}
+.tile.exit{background:rgba(123,224,168,0.16);box-shadow:inset 0 0 0 2px var(--ok),0 0 20px -6px var(--ok)}
+.tile.exit::after{content:"";position:absolute;inset:25%;border-radius:4px;border:2px solid var(--ok);opacity:0.75}
+.tile.plate{--pc:var(--c1)}
+.tile.plate.k2{--pc:var(--c2)}
+.tile.plate::after{content:"";position:absolute;inset:23%;border:2px solid var(--pc);opacity:0.85}
+.tile.plate.k1::after{border-radius:50%}
+.tile.plate.k2::after{border-radius:3px;transform:rotate(45deg)}
+.tile.plate.on::after{background:var(--pc);opacity:0.95}
+.tile.plate.on{box-shadow:inset 0 0 0 2px var(--pc)}
+.tile.door{--pc:var(--c1);--pc-dim:rgba(255,111,156,0.4)}
+.tile.door.k2{--pc:var(--c2);--pc-dim:rgba(165,232,92,0.4)}
+.tile.door{background:rgba(255,111,156,0.16);box-shadow:inset 0 0 0 2px var(--pc)}
+.tile.door.k2{background:rgba(165,232,92,0.16)}
+.tile.door::before{content:"";position:absolute;inset:0;border-radius:inherit;opacity:1;
+  background:repeating-linear-gradient(90deg,var(--pc) 0 3px,transparent 3px 9px);
+  transition:opacity var(--dur) ease}
+.tile.door::after{content:"";position:absolute;inset:32%;border:2px solid var(--pc);opacity:0.95}
+.tile.door.k1::after{border-radius:50%}
+.tile.door.k2::after{border-radius:2px;transform:rotate(45deg)}
+.tile.door.open{background:#212b40;box-shadow:inset 0 0 0 2px var(--pc-dim)}
+.tile.door.open::before{opacity:0}
+.tile.door.open::after{opacity:0.3}
+.tile.bump{animation:bump 0.32s ease}
+@keyframes bump{0%,100%{outline:0 solid transparent}45%{outline:3px solid var(--warn);outline-offset:-3px;background-color:rgba(255,107,107,0.28)}}
+.body{position:absolute;width:var(--tile);height:var(--tile);border-radius:calc(var(--tile)/5);
+  display:grid;place-items:center;pointer-events:none;left:8px;top:8px;
+  transform:translate3d(var(--bx),var(--by),0);
+  transition:transform var(--dur) cubic-bezier(0.3,0.8,0.4,1)}
+.body.you{background:var(--you);box-shadow:0 0 0 2px #bdf3ff inset,0 0 20px -3px var(--you);z-index:3}
+.body.you::after{content:"";width:26%;height:26%;border-radius:50%;background:#06212c}
+.body.gh{background:var(--ghost);opacity:0.5;z-index:2;box-shadow:0 0 0 2px rgba(255,222,186,0.55) inset}
+.body.gh::after{content:attr(data-n);font-size:calc(var(--tile)/2.7);font-weight:800;color:#3b2409}
+.body.gh.spent{opacity:0.32}
+
+#pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:224px;margin:0 auto;width:100%}
+#pad .btn{padding:0;height:50px;font-size:1.15em}
+#pad .sp{visibility:hidden}
+#acts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#acts .btn{padding:0.5em 0.4em;font-size:0.93em;gap:0.35em}
+.hint{color:var(--muted);font-size:0.88em}
+.keycap{display:inline-block;border:1px solid var(--line);background:var(--bg3);border-radius:6px;padding:0 5px;font-size:0.82em;font-weight:700;color:var(--muted)}
+#ghostlist{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.gchip{display:inline-flex;align-items:center;gap:5px;font-size:0.8em;font-weight:700;padding:3px 9px;border-radius:99px;background:var(--ghost-dark);color:var(--ghost);border:1px solid rgba(255,171,94,0.3)}
+
+/* ---------- modal ---------- */
+#modal{position:fixed;inset:0;display:none;place-items:center;padding:16px;z-index:50;
+  background:rgba(6,8,13,0.74)}
+#modal.on{display:grid}
+.dlg{width:min(430px,100%);max-height:88dvh;overflow-y:auto;background:var(--bg2);border:1px solid var(--line);
+  border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:14px;box-shadow:0 30px 80px -30px #000;
+  animation:rise 0.18s ease}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}}
+.scores{display:grid;grid-template-columns:repeat(auto-fit,minmax(72px,1fr));gap:8px}
+.sc{background:var(--bg3);border:1px solid var(--line);border-radius:var(--rs);padding:8px;text-align:center}
+.sc b{display:block;font-size:1.2em;font-variant-numeric:tabular-nums}
+.sc span{font-size:0.7em;text-transform:uppercase;letter-spacing:0.07em;color:var(--dim);font-weight:600}
+.dlg .row .btn{flex:1 1 44%}
+.badge{align-self:flex-start;font-size:0.75em;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;
+  padding:3px 9px;border-radius:99px;background:var(--you-dark);color:var(--you)}
+.badge.warn{background:#3a1620;color:#ff96a3}
+.badge.ok{background:#0d3324;color:var(--ok)}
+
+@media (max-width:480px){
+  .stat{padding:2px 7px}
+  #pad{max-width:200px}
+  #pad .btn{height:46px}
+  .lvgrid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:0.001ms !important;animation-iteration-count:1 !important;transition-duration:0.001ms !important;scroll-behavior:auto !important}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<section id="s-title" class="scr">
+  <div class="wrap">
+    <div class="logo">
+      <svg viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+        <circle cx="24" cy="24" r="18" fill="none" stroke="#2f4a63" stroke-width="2.5" stroke-dasharray="70 26" stroke-linecap="round"></circle>
+        <circle cx="39" cy="33" r="4.6" fill="#ffab5e" opacity="0.62" stroke="#0d1017" stroke-width="2.4"></circle>
+        <circle cx="9" cy="33" r="4.6" fill="#ffab5e" opacity="0.34" stroke="#0d1017" stroke-width="2.4"></circle>
+        <circle cx="24" cy="6" r="5.2" fill="#57dcff" stroke="#0d1017" stroke-width="2.4"></circle>
+      </svg>
+      <h1>Paradox&nbsp;Loop</h1>
+    </div>
+    <p class="hook">The room needs more hands than you have. Rewind, and borrow your own past.</p>
+    <div class="vign" aria-hidden="true"><i class="you"></i><i class="g1"></i><i class="g2"></i><i></i></div>
+    <div class="row">
+      <button class="btn pri" id="b-play" type="button">Play</button>
+      <button class="btn" id="b-how" type="button">How to play</button>
+      <button class="btn gho" id="b-levels" type="button">Levels</button>
+    </div>
+    <p class="tiny muted" id="titlefoot">Arrow keys, WASD, or the on-screen buttons.</p>
+  </div>
+</section>
+
+<section id="s-how" class="scr">
+  <div class="head"><h2>How to play</h2><button class="btn sm" id="b-how-back" type="button">Back</button></div>
+  <div class="scroll"><div class="inner">
+    <div class="steps">
+      <div class="step card">
+        <div class="n" aria-hidden="true">1</div>
+        <h3>Move, one turn at a time</h3>
+        <div class="mini" aria-hidden="true">
+          <div class="r"><span class="t w"></span><span class="t"></span><span class="t"></span><span class="t w"></span></div>
+          <div class="r"><span class="t w"></span><span class="t you"></span><span class="t"></span><span class="t ex"></span></div>
+          <div class="r"><span class="t w"></span><span class="t"></span><span class="t w"></span><span class="t w"></span></div>
+        </div>
+        <p class="hint">One key press is one turn. Walls, shut doors and other bodies refuse you &mdash; a refused move costs nothing.</p>
+      </div>
+      <div class="step card">
+        <div class="n" aria-hidden="true">2</div>
+        <h3>Plates hold doors open</h3>
+        <div class="mini" aria-hidden="true">
+          <div class="r"><span class="t w"></span><span class="t"></span><span class="t"></span><span class="t w"></span></div>
+          <div class="r"><span class="t p1"></span><span class="t"></span><span class="t d1"></span><span class="t ex"></span></div>
+          <div class="r"><span class="t w"></span><span class="t you"></span><span class="t"></span><span class="t w"></span></div>
+        </div>
+        <p class="hint">A door stays open while a body stands on a plate of its colour. Round plates open round doors, diamond opens diamond.</p>
+      </div>
+      <div class="step card">
+        <div class="n" aria-hidden="true">3</div>
+        <h3>Rewind and meet yourself</h3>
+        <div class="mini" aria-hidden="true">
+          <div class="r"><span class="t w"></span><span class="t"></span><span class="t"></span><span class="t w"></span></div>
+          <div class="r"><span class="t p1 gh"></span><span class="t"></span><span class="t d1o"></span><span class="t you"></span></div>
+          <div class="r"><span class="t w"></span><span class="t"></span><span class="t"></span><span class="t w"></span></div>
+        </div>
+        <p class="hint">Rewind sends the room back to the start. A ghost now replays your last attempt beside you &mdash; standing on that plate so you can walk through.</p>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Legend</h3>
+      <div class="legend" style="margin-top:10px">
+        <div class="lg"><span class="sw you"></span> You</div>
+        <div class="lg"><span class="sw gh"></span> A ghost (a past you)</div>
+        <div class="lg"><span class="sw p1"></span> Round plate &amp; door</div>
+        <div class="lg"><span class="sw p2"></span> Diamond plate &amp; door</div>
+        <div class="lg"><span class="sw ex"></span> Exit &mdash; you must stand on it</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Keys</h3>
+      <ul class="hint" style="margin-top:8px">
+        <li><span class="keycap">&larr;&uarr;&darr;&rarr;</span> or <span class="keycap">WASD</span> move &mdash; <span class="keycap">Space</span> wait</li>
+        <li><span class="keycap">Enter</span> rewind &mdash; <span class="keycap">Backspace</span> restart level &mdash; <span class="keycap">Esc</span> pause</li>
+        <li>On a touch screen, swipe the board or use the buttons.</li>
+      </ul>
+    </div>
+    <div class="row"><button class="btn pri" id="b-how-play" type="button">Start playing</button></div>
+  </div></div>
+</section>
+
+<section id="s-levels" class="scr">
+  <div class="head"><h2>Levels</h2><button class="btn sm" id="b-lv-back" type="button">Back</button></div>
+  <div class="scroll"><div class="inner">
+    <div class="lvgrid" id="lvgrid"></div>
+    <div class="row" style="justify-content:space-between;align-items:center">
+      <p class="tiny muted" id="progfoot"></p>
+      <button class="btn sm gho" id="b-reset" type="button">Reset all progress</button>
+    </div>
+  </div></div>
+</section>
+
+<section id="s-game" class="scr" aria-label="Puzzle">
+  <div id="bar">
+    <span id="lvname"><small>Level</small><span id="lvtitle">&mdash;</span></span>
+    <span class="stat"><b id="st-turns">&mdash;</b><span>Turns left</span></span>
+    <span class="stat"><b id="st-loops">&mdash;</b><span>Loops left</span></span>
+    <span class="stat"><b id="st-ghosts">&mdash;</b><span>Ghosts</span></span>
+    <span class="stat"><b id="st-par">&mdash;</b><span>Par</span></span>
+  </div>
+  <div id="boardwrap"><div id="board" role="img" aria-label="Puzzle grid"></div></div>
+  <div id="side">
+    <div class="card" id="sidecard">
+      <h3 id="sc-name">&mdash;</h3>
+      <p class="hint" id="sc-hint"></p>
+      <div id="ghostlist"></div>
+      <p class="tiny muted" id="sc-best">&mdash;</p>
+    </div>
+    <div id="pad">
+      <span class="sp"></span>
+      <button class="btn" type="button" data-move="up" aria-label="Move up">&uarr;</button>
+      <span class="sp"></span>
+      <button class="btn" type="button" data-move="left" aria-label="Move left">&larr;</button>
+      <button class="btn" type="button" data-move="wait" aria-label="Wait one turn">&#9679;</button>
+      <button class="btn" type="button" data-move="right" aria-label="Move right">&rarr;</button>
+      <span class="sp"></span>
+      <button class="btn" type="button" data-move="down" aria-label="Move down">&darr;</button>
+      <span class="sp"></span>
+    </div>
+    <div id="acts">
+      <button class="btn pri" id="b-rewind" type="button">Rewind</button>
+      <button class="btn" id="b-restart" type="button">Restart</button>
+      <button class="btn gho" id="b-pause" type="button">Menu</button>
+      <button class="btn gho" id="b-help" type="button">How to play</button>
+    </div>
+  </div>
+</section>
+
+<div id="modal" role="presentation">
+  <div class="dlg" id="dlg" role="dialog" aria-modal="true" aria-labelledby="dlg-title" tabindex="-1"></div>
+</div>
+
+<p id="live" class="sr" role="status" aria-live="polite"></p>
+</div>
+<script>
+"use strict";
+var DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0], wait: [0, 0] };
+
+var LEVELS = [
+  {
+    id: "l1", name: "First Steps", hint: "Just walk to the exit. One key press is one turn.",
+    turns: 12, par: 1,
+    rows: [
+      "#######",
+      "#S....#",
+      "#.###.#",
+      "#....X#",
+      "#######"
+    ]
+  },
+  {
+    id: "l2", name: "Held Open", hint: "The door only opens while a body stands on the round plate. You cannot be in two places... yet.",
+    turns: 10, par: 2,
+    rows: [
+      "#######",
+      "#S.#..#",
+      "#..A..#",
+      "#1.#.X#",
+      "#######"
+    ]
+  },
+  {
+    id: "l3", name: "Two Plates", hint: "Two round plates, one door. More bodies, more options.",
+    turns: 11, par: 3,
+    rows: [
+      "#########",
+      "#S..#1..#",
+      "#.#.#.#.#",
+      "#1..A..X#",
+      "#########"
+    ]
+  },
+  {
+    id: "l4", name: "Let Go", hint: "Step off the plate and the door slams. Someone else has to hold it.",
+    turns: 12, par: 2,
+    rows: [
+      "#########",
+      "#S.....##",
+      "#..######",
+      "#1..A..X#",
+      "#########"
+    ]
+  },
+  {
+    id: "l5", name: "In Your Own Way", hint: "The only way out is the plate corridor. Get through it before your past parks there.",
+    turns: 12, par: 2,
+    rows: [
+      "#########",
+      "#S......#",
+      "###1#####",
+      "#...A..X#",
+      "#########"
+    ]
+  },
+  {
+    id: "l6", name: "Paradox Loop", hint: "Round opens the way to diamond, diamond opens the way out. Three of you, exactly.",
+    turns: 13, par: 3,
+    rows: [
+      "#########",
+      "#S.1#.2.#",
+      "#...A...#",
+      "#######B#",
+      "#.......#",
+      "#######X#",
+      "#########"
+    ]
+  }
+];
+
+function parseLevel(def) {
+  var h = def.rows.length, w = def.rows[0].length;
+  var cells = [], start = null, x, y;
+  for (y = 0; y < h; y++) {
+    for (x = 0; x < w; x++) {
+      var ch = def.rows[y].charAt(x), c = { t: "floor", k: 0 };
+      if (ch === "#") c.t = "wall";
+      else if (ch === "S") { c.t = "start"; start = { x: x, y: y }; }
+      else if (ch === "X") c.t = "exit";
+      else if (ch === "1") { c.t = "plate"; c.k = 1; }
+      else if (ch === "2") { c.t = "plate"; c.k = 2; }
+      else if (ch === "A") { c.t = "door"; c.k = 1; }
+      else if (ch === "B") { c.t = "door"; c.k = 2; }
+      cells.push(c);
+    }
+  }
+  return { def: def, id: def.id, name: def.name, hint: def.hint, w: w, h: h, cells: cells,
+           start: start, turns: def.turns, par: def.par };
+}
+
+function cellAt(L, x, y) {
+  if (x < 0 || y < 0 || x >= L.w || y >= L.h) return null;
+  return L.cells[y * L.w + x];
+}
+
+function powerOf(L, occ) {
+  var p = { 1: false, 2: false }, i, c;
+  for (i = 0; i < occ.length; i++) {
+    c = cellAt(L, occ[i].x, occ[i].y);
+    if (c && c.t === "plate") p[c.k] = true;
+  }
+  return p;
+}
+
+function newRun(L) {
+  return { L: L, loop: 1, turnsThisLoop: 0, totalTurns: 0, ghosts: [], rec: [],
+           you: { x: L.start.x, y: L.start.y }, over: null };
+}
+
+function bodyList(run) {
+  var list = [{ x: run.you.x, y: run.you.y }], i;
+  for (i = 0; i < run.ghosts.length; i++) list.push({ x: run.ghosts[i].x, y: run.ghosts[i].y });
+  return list;
+}
+
+function canEnter(L, list, idx, nx, ny) {
+  var c = cellAt(L, nx, ny), j;
+  if (!c || c.t === "wall") return { ok: false, reason: "wall" };
+  for (j = 0; j < list.length; j++) {
+    if (j !== idx && list[j].x === nx && list[j].y === ny) return { ok: false, reason: "body" };
+  }
+  if (c.t === "door") {
+    var occ = [];
+    for (j = 0; j < list.length; j++) occ.push(j === idx ? { x: nx, y: ny } : list[j]);
+    if (!powerOf(L, occ)[c.k]) return { ok: false, reason: "door" };
+  }
+  return { ok: true, reason: "" };
+}
+
+function doTurn(run, action) {
+  var res = { ok: true, refused: false, refusedAt: null, reason: "", won: false, timeUp: false };
+  if (run.over) { res.ok = false; res.reason = "over"; return res; }
+  if (!DIRS[action]) { res.ok = false; res.reason = "bad"; return res; }
+  var list = bodyList(run), d, nx, ny, chk;
+  if (action !== "wait") {
+    d = DIRS[action]; nx = run.you.x + d[0]; ny = run.you.y + d[1];
+    chk = canEnter(run.L, list, 0, nx, ny);
+    if (!chk.ok) {
+      res.ok = false; res.refused = true; res.reason = chk.reason;
+      res.refusedAt = { x: nx, y: ny };
+      return res;
+    }
+    run.you.x = nx; run.you.y = ny;
+  }
+  run.rec.push(action);
+  run.turnsThisLoop++; run.totalTurns++;
+  var i, g, a, dd, gx, gy, l2, c2;
+  for (i = 0; i < run.ghosts.length; i++) {
+    g = run.ghosts[i];
+    if (g.i >= g.path.length) continue;
+    a = g.path[g.i];
+    if (a === "wait") { g.i++; continue; }
+    dd = DIRS[a]; gx = g.x + dd[0]; gy = g.y + dd[1];
+    l2 = bodyList(run);
+    c2 = canEnter(run.L, l2, i + 1, gx, gy);
+    if (c2.ok) { g.x = gx; g.y = gy; g.i++; }
+  }
+  var here = cellAt(run.L, run.you.x, run.you.y);
+  if (here && here.t === "exit") { res.won = true; run.over = "win"; return res; }
+  if (run.turnsThisLoop >= run.L.turns) res.timeUp = true;
+  return res;
+}
+
+function canRewind(run) {
+  if (run.over) return { ok: false, reason: "over" };
+  if (run.loop >= run.L.par) return { ok: false, reason: "noloops" };
+  return { ok: true, reason: "" };
+}
+
+function rewind(run) {
+  var chk = canRewind(run);
+  if (!chk.ok) return chk;
+  run.ghosts.push({ path: run.rec.slice(), i: 0, x: run.L.start.x, y: run.L.start.y });
+  var i;
+  for (i = 0; i < run.ghosts.length; i++) {
+    run.ghosts[i].i = 0; run.ghosts[i].x = run.L.start.x; run.ghosts[i].y = run.L.start.y;
+  }
+  run.rec = [];
+  run.loop++;
+  run.turnsThisLoop = 0;
+  run.you = { x: run.L.start.x, y: run.L.start.y };
+  return { ok: true, reason: "" };
+}
+/* ---------- storage ---------- */
+var SKEY = "paradoxLoop.v1";
+var mem = { best: {} };
+var storeOK = true;
+
+function loadState() {
+  var raw = null;
+  try { raw = window.localStorage.getItem(SKEY); } catch (e) { storeOK = false; return; }
+  if (!raw) return;
+  var data = null;
+  try { data = JSON.parse(raw); } catch (e2) { return; }
+  if (!data || typeof data !== "object" || Array.isArray(data)) return;
+  var best = {}, i, L, b;
+  if (data.best && typeof data.best === "object" && !Array.isArray(data.best)) {
+    for (i = 0; i < LEVELS.length; i++) {
+      L = LEVELS[i]; b = data.best[L.id];
+      if (b && typeof b === "object" &&
+          typeof b.loops === "number" && typeof b.turns === "number" &&
+          isFinite(b.loops) && isFinite(b.turns) && b.loops > 0 && b.turns >= 0) {
+        best[L.id] = { loops: Math.floor(b.loops), turns: Math.floor(b.turns) };
+      }
+    }
+  }
+  mem.best = best;
+}
+
+function saveState() {
+  if (!storeOK) return;
+  try { window.localStorage.setItem(SKEY, JSON.stringify(mem)); }
+  catch (e) { storeOK = false; }
+}
+
+/* ---------- dom helpers ---------- */
+function $(id) { return document.getElementById(id); }
+function plural(n, word) { return n + " " + word + (n === 1 ? "" : "s"); }
+function el(tag, cls, txt) {
+  var n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (txt !== undefined && txt !== null) n.textContent = txt;
+  return n;
+}
+
+var screens = ["s-title", "s-how", "s-levels", "s-game"];
+var current = "s-title";
+var timers = [];
+function later(fn, ms) {
+  var t = window.setTimeout(fn, ms);
+  timers.push(t);
+  if (timers.length > 40) timers.splice(0, timers.length - 40);
+  return t;
+}
+function clearTimers() { var i; for (i = 0; i < timers.length; i++) window.clearTimeout(timers[i]); timers = []; }
+
+function show(id) {
+  var i, n;
+  for (i = 0; i < screens.length; i++) {
+    n = $(screens[i]);
+    if (screens[i] === id) n.classList.add("on"); else n.classList.remove("on");
+  }
+  current = id;
+  if (id === "s-levels") renderLevels();
+  if (id === "s-game") { fitBoard(); window.requestAnimationFrame(fitBoard); }
+}
+
+function say(msg) {
+  var l = $("live");
+  l.textContent = "";
+  later(function () { l.textContent = msg; }, 30);
+}
+
+/* ---------- modal ---------- */
+var modal, dlg, lastFocus = null, dlgKind = null;
+
+function closeDlg() {
+  if (!dlgKind) return;
+  dlgKind = null;
+  modal.classList.remove("on");
+  dlg.innerHTML = "";
+  var i;
+  for (i = 0; i < screens.length; i++) $(screens[i]).removeAttribute("inert");
+  if (lastFocus && lastFocus.isConnected && lastFocus.offsetParent !== null) {
+    try { lastFocus.focus(); } catch (e) { /* focus may fail on hidden nodes */ }
+  }
+  lastFocus = null;
+}
+
+function openDlg(kind, cfg) {
+  lastFocus = document.activeElement;
+  dlgKind = kind;
+  dlg.innerHTML = "";
+  var h = el("h2", null, cfg.title);
+  h.id = "dlg-title";
+  if (cfg.badge) dlg.appendChild(el("span", "badge " + (cfg.badgeCls || ""), cfg.badge));
+  dlg.appendChild(h);
+  if (cfg.text) dlg.appendChild(el("p", "hint", cfg.text));
+  if (cfg.scores && cfg.scores.length) {
+    var sw = el("div", "scores"), i, s, box;
+    for (i = 0; i < cfg.scores.length; i++) {
+      s = cfg.scores[i];
+      box = el("div", "sc");
+      box.appendChild(el("b", null, String(s[1])));
+      box.appendChild(el("span", null, s[0]));
+      sw.appendChild(box);
+    }
+    dlg.appendChild(sw);
+  }
+  if (cfg.note) dlg.appendChild(el("p", "tiny muted", cfg.note));
+  var row = el("div", "row"), j, b, btn;
+  for (j = 0; j < cfg.buttons.length; j++) {
+    b = cfg.buttons[j];
+    btn = el("button", "btn " + (b.cls || ""), b.label);
+    btn.type = "button";
+    btn.addEventListener("click", b.act);
+    row.appendChild(btn);
+  }
+  dlg.appendChild(row);
+  modal.classList.add("on");
+  var k;
+  for (k = 0; k < screens.length; k++) $(screens[k]).setAttribute("inert", "");
+  var first = dlg.querySelector("button");
+  if (first) first.focus(); else dlg.focus();
+}
+
+function dlgKeys(e) {
+  if (!dlgKind) return;
+  if (e.key === "Escape") {
+    e.preventDefault();
+    if (dlgKind === "pause") resumeGame();
+    else if (dlgKind === "confirm") closeDlg();
+    return;
+  }
+  if (e.key !== "Tab") return;
+  var f = dlg.querySelectorAll("button");
+  if (!f.length) return;
+  var first = f[0], last = f[f.length - 1];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+}
+
+/* ---------- level select ---------- */
+function unlockedCount() {
+  var n = 1, i;
+  for (i = 0; i < LEVELS.length; i++) { if (mem.best[LEVELS[i].id]) n = Math.max(n, i + 2); }
+  return Math.min(n, LEVELS.length);
+}
+
+function bestText(id) {
+  var b = mem.best[id];
+  if (!b) return "Best —";
+  return "Best " + plural(b.loops, "loop") + " · " + plural(b.turns, "turn");
+}
+
+function renderLevels() {
+  var grid = $("lvgrid"), unl = unlockedCount(), i, def, card, done = 0;
+  grid.innerHTML = "";
+  for (i = 0; i < LEVELS.length; i++) {
+    def = LEVELS[i];
+    if (mem.best[def.id]) done++;
+    card = el("button", "lvcard");
+    card.type = "button";
+    card.appendChild(el("span", "no", "Level " + (i + 1)));
+    card.appendChild(el("span", "nm", def.name));
+    if (i < unl) {
+      card.appendChild(el("span", "bs" + (mem.best[def.id] ? " done" : ""), bestText(def.id)));
+      card.setAttribute("aria-label", "Level " + (i + 1) + ", " + def.name + ", " + bestText(def.id));
+      (function (idx) {
+        card.addEventListener("click", function () { startLevel(idx); });
+      }(i));
+    } else {
+      card.disabled = true;
+      card.appendChild(el("span", "bs", "🔒 Locked"));
+      card.setAttribute("aria-label", "Level " + (i + 1) + ", " + def.name + ", locked");
+    }
+    grid.appendChild(card);
+  }
+  $("progfoot").textContent = done + " of " + LEVELS.length + " levels cleared" +
+    (storeOK ? "" : " · progress not saved on this browser");
+}
+
+/* ---------- game ---------- */
+var run = null, L = null, lvIndex = 0, board, bodyEls = [], locked = false;
+
+function startLevel(i) {
+  clearTimers();
+  lvIndex = i;
+  L = parseLevel(LEVELS[i]);
+  run = newRun(L);
+  locked = false;
+  buildBoard();
+  show("s-game");
+  updateAll();
+  say(L.name + ". " + L.hint);
+}
+
+function buildBoard() {
+  var x, y, c, t;
+  board.innerHTML = "";
+  bodyEls = [];
+  board.style.setProperty("--cols", L.w);
+  board.style.setProperty("--rows", L.h);
+  for (y = 0; y < L.h; y++) {
+    for (x = 0; x < L.w; x++) {
+      c = cellAt(L, x, y);
+      t = el("div", "tile " + (c.t === "floor" ? "" : c.t) + (c.k ? " k" + c.k : ""));
+      board.appendChild(t);
+    }
+  }
+  fitBoard();
+}
+
+function tileEl(x, y) { return board.children[y * L.w + x]; }
+
+function fitBoard() {
+  if (!L) return;
+  var wrap = $("boardwrap");
+  var W = wrap.clientWidth, H = wrap.clientHeight;
+  if (!W || !H) return;
+  var gap = 3, pad = 16;
+  var tw = (W - pad - gap * (L.w - 1)) / L.w;
+  var th = (H - pad - gap * (L.h - 1)) / L.h;
+  var t = Math.floor(Math.min(tw, th));
+  if (!isFinite(t) || t < 14) t = 14;
+  if (t > 92) t = 92;
+  board.style.setProperty("--tile", t + "px");
+  placeBodies(t, gap);
+}
+
+function ensureBodyEls() {
+  var want = 1 + run.ghosts.length, n, e;
+  while (bodyEls.length > want) { e = bodyEls.pop(); e.remove(); }
+  while (bodyEls.length < want) {
+    n = bodyEls.length;
+    e = el("div", n === 0 ? "body you" : "body gh");
+    if (n > 0) e.setAttribute("data-n", String(n));
+    board.appendChild(e);
+    bodyEls.push(e);
+  }
+}
+
+function placeBodies(t, gap) {
+  if (!run) return;
+  if (t === undefined) {
+    t = parseFloat(board.style.getPropertyValue("--tile")) || 32;
+    gap = 3;
+  }
+  ensureBodyEls();
+  var list = bodyList(run), i, seen = {}, key, n, off, e;
+  for (i = 0; i < list.length; i++) {
+    key = list[i].x + "," + list[i].y;
+    if (seen[key] === undefined) seen[key] = 0; else seen[key]++;
+    n = seen[key];
+    off = n === 0 ? 0 : Math.min(n * (t * 0.16), t * 0.4);
+    e = bodyEls[i];
+    e.style.setProperty("--bx", (list[i].x * (t + gap) + off) + "px");
+    e.style.setProperty("--by", (list[i].y * (t + gap) + off) + "px");
+    e.style.width = (n === 0 ? t : t * 0.72) + "px";
+    e.style.height = (n === 0 ? t : t * 0.72) + "px";
+    if (i > 0) {
+      var g = run.ghosts[i - 1];
+      if (g.i >= g.path.length) e.classList.add("spent"); else e.classList.remove("spent");
+    }
+  }
+}
+
+function updateBoard() {
+  var p = powerOf(L, bodyList(run)), x, y, c, t;
+  for (y = 0; y < L.h; y++) {
+    for (x = 0; x < L.w; x++) {
+      c = cellAt(L, x, y);
+      if (c.t !== "door" && c.t !== "plate") continue;
+      t = tileEl(x, y);
+      if (c.t === "door") { if (p[c.k]) t.classList.add("open"); else t.classList.remove("open"); }
+      else {
+        var on = false, list = bodyList(run), i;
+        for (i = 0; i < list.length; i++) if (list[i].x === x && list[i].y === y) on = true;
+        if (on) t.classList.add("on"); else t.classList.remove("on");
+      }
+    }
+  }
+  placeBodies();
+}
+
+function updateBar() {
+  var left = L.turns - run.turnsThisLoop, loopsLeft = L.par - run.loop;
+  $("lvtitle").textContent = (lvIndex + 1) + ". " + L.name;
+  $("st-turns").textContent = String(left);
+  $("st-loops").textContent = String(loopsLeft);
+  $("st-ghosts").textContent = String(run.ghosts.length);
+  $("st-par").textContent = String(L.par);
+  $("st-turns").parentNode.classList.toggle("low", left <= 3);
+  $("st-loops").parentNode.classList.toggle("low", loopsLeft === 0);
+  $("sc-name").textContent = L.name;
+  $("sc-hint").textContent = L.hint;
+  $("sc-best").textContent = bestText(L.id) + " · par " + L.par;
+  var gl = $("ghostlist"), i, chip;
+  gl.innerHTML = "";
+  if (!run.ghosts.length) gl.appendChild(el("span", "tiny muted", "No ghosts yet — this is loop " + run.loop + " of " + L.par + "."));
+  for (i = 0; i < run.ghosts.length; i++) {
+    chip = el("span", "gchip", "Ghost " + (i + 1) + " · " + run.ghosts[i].path.length + " moves");
+    gl.appendChild(chip);
+  }
+  var rw = $("b-rewind"), spent = run.loop >= L.par;
+  rw.classList.toggle("pri", !spent);
+  rw.setAttribute("aria-label", spent ? "Rewind, no loops left" : "Rewind");
+}
+
+function colourName(k) { return k === 1 ? "round" : "diamond"; }
+
+function describeBoard() {
+  var p = powerOf(L, bodyList(run)), parts = [], i, g, seen = { 1: false, 2: false }, c, x, y;
+  parts.push("You on column " + (run.you.x + 1) + ", row " + (run.you.y + 1) + ".");
+  for (i = 0; i < run.ghosts.length; i++) {
+    g = run.ghosts[i];
+    parts.push("Ghost " + (i + 1) + " on column " + (g.x + 1) + ", row " + (g.y + 1) +
+               (g.i >= g.path.length ? ", recording finished." : "."));
+  }
+  for (y = 0; y < L.h; y++) {
+    for (x = 0; x < L.w; x++) {
+      c = cellAt(L, x, y);
+      if (c.t === "door" && !seen[c.k]) {
+        seen[c.k] = true;
+        parts.push("The " + colourName(c.k) + " door is " + (p[c.k] ? "open" : "shut") + ".");
+      }
+    }
+  }
+  parts.push("Turn " + run.turnsThisLoop + " of " + L.turns + ", loop " + run.loop + " of " + L.par + ".");
+  return parts.join(" ");
+}
+
+function updateAll() {
+  updateBoard();
+  updateBar();
+  board.setAttribute("aria-label", L.name + ". " + describeBoard());
+}
+
+function flash(x, y) {
+  var t = tileEl(x, y);
+  if (!t) return;
+  t.classList.remove("bump");
+  void t.offsetWidth;
+  t.classList.add("bump");
+  later(function () { t.classList.remove("bump"); }, 400);
+}
+
+var refuseMsg = { wall: "Wall. That move is refused.", door: "That door is shut. The move is refused.", body: "Another body is there. The move is refused." };
+
+function act(action) {
+  if (!run || locked || dlgKind) return;
+  var r = doTurn(run, action);
+  if (r.refused) {
+    if (r.refusedAt) {
+      if (r.refusedAt.x >= 0 && r.refusedAt.y >= 0 && r.refusedAt.x < L.w && r.refusedAt.y < L.h) flash(r.refusedAt.x, r.refusedAt.y);
+      else flash(run.you.x, run.you.y);
+    }
+    say(refuseMsg[r.reason] || "Refused.");
+    return;
+  }
+  if (!r.ok) return;
+  updateAll();
+  if (r.won) { locked = true; board.classList.add("win"); later(winLevel, 320); return; }
+  if (r.timeUp) {
+    locked = true;
+    later(function () {
+      locked = false;
+      if (run.loop >= L.par) loseLevel();
+      else { doRewind(true); }
+    }, 360);
+  }
+}
+
+function doRewind(auto) {
+  if (!run || dlgKind) return;
+  if (!auto && locked) return;
+  var chk = canRewind(run);
+  if (!chk.ok) {
+    if (chk.reason === "noloops") {
+      say("No loops remain. Restart the level to try again.");
+      openDlg("confirm", {
+        title: "No loops left",
+        badge: "Rewind refused", badgeCls: "warn",
+        text: "You have used every loop on this level. Restart it to try a different plan.",
+        buttons: [
+          { label: "Restart level", cls: "pri", act: function () { closeDlg(); restartLevel(); } },
+          { label: "Keep playing", act: closeDlg }
+        ]
+      });
+    }
+    return;
+  }
+  var moves = run.rec.length;
+  rewind(run);
+  updateAll();
+  say((auto ? "Turn limit reached, the loop rewinds. " : "Rewound. ") +
+      "Ghost " + run.ghosts.length + " now replays " + plural(moves, "move") +
+      ". Loop " + run.loop + " of " + L.par + ".");
+}
+
+function restartLevel() {
+  clearTimers();
+  locked = false;
+  board.classList.remove("win");
+  run = newRun(L);
+  updateAll();
+  say("Level restarted.");
+}
+
+function winLevel() {
+  board.classList.remove("win");
+  var loops = run.loop, turns = run.totalTurns;
+  var prev = mem.best[L.id], isBest = false;
+  if (!prev || loops < prev.loops || (loops === prev.loops && turns < prev.turns)) {
+    mem.best[L.id] = { loops: loops, turns: turns };
+    isBest = true;
+    saveState();
+  }
+  var b = mem.best[L.id];
+  var last = lvIndex >= LEVELS.length - 1;
+  say("Solved in " + plural(loops, "loop") + " and " + plural(turns, "turn") + ".");
+  var btns = [];
+  if (last) btns.push({ label: "See the ending", cls: "pri", act: function () { closeDlg(); allDone(); } });
+  else btns.push({ label: "Next level", cls: "pri", act: function () { closeDlg(); startLevel(lvIndex + 1); } });
+  btns.push({ label: "Retry", act: function () { closeDlg(); startLevel(lvIndex); } });
+  btns.push({ label: "Levels", act: function () { closeDlg(); show("s-levels"); } });
+  openDlg("win", {
+    title: "Level solved",
+    badge: isBest ? "New best" : (loops <= L.par ? "Within par" : "Solved"),
+    badgeCls: isBest ? "ok" : "",
+    scores: [["Loops", loops], ["Par", L.par], ["Turns", turns], ["Best", b.loops + "/" + b.turns]],
+    note: (isBest ? "New best saved: " : "Your best here is ") +
+          plural(b.loops, "loop") + " and " + plural(b.turns, "turn") + ".",
+    buttons: btns
+  });
+}
+
+function loseLevel() {
+  locked = true;
+  say("Out of loops. The level resets.");
+  openDlg("lose", {
+    title: "Out of loops",
+    badge: "Paradox collapsed", badgeCls: "warn",
+    text: "The last loop ran out of turns and there is no rewind left. Nothing is lost — take it again.",
+    scores: [["Loops", L.par], ["Par", L.par], ["Turns", run.totalTurns]],
+    buttons: [
+      { label: "Retry level", cls: "pri", act: function () { closeDlg(); restartLevel(); } },
+      { label: "Back to levels", act: function () { closeDlg(); show("s-levels"); } }
+    ]
+  });
+}
+
+function allDone() {
+  var i, tl = 0, tt = 0, par = 0, b;
+  for (i = 0; i < LEVELS.length; i++) {
+    b = mem.best[LEVELS[i].id];
+    par += LEVELS[i].par;
+    if (b) { tl += b.loops; tt += b.turns; }
+  }
+  say("All levels complete.");
+  openDlg("end", {
+    title: "The loop closes",
+    badge: "All six levels complete", badgeCls: "ok",
+    text: "Every room solved. Your past selves can rest — until you go back for a lower score.",
+    scores: [["Loops", tl], ["Total par", par], ["Turns", tt], ["Levels", LEVELS.length]],
+    note: "Replay any level from the level list to beat your best.",
+    buttons: [
+      { label: "Level select", cls: "pri", act: function () { closeDlg(); show("s-levels"); } },
+      { label: "Title screen", act: function () { closeDlg(); show("s-title"); } }
+    ]
+  });
+}
+
+function pauseGame() {
+  if (!run || dlgKind) return;
+  openDlg("pause", {
+    title: "Paused",
+    text: L.name + " — loop " + run.loop + " of " + L.par + ", " + (L.turns - run.turnsThisLoop) + " turns left this loop.",
+    buttons: [
+      { label: "Resume", cls: "pri", act: resumeGame },
+      { label: "Restart level", act: function () { closeDlg(); restartLevel(); } },
+      { label: "How to play", act: function () { closeDlg(); show("s-how"); } },
+      { label: "Back to levels", act: function () { closeDlg(); show("s-levels"); } }
+    ]
+  });
+}
+function resumeGame() { closeDlg(); }
+
+/* ---------- input ---------- */
+var KEYMAP = {
+  ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right",
+  w: "up", a: "left", s: "down", d: "right",
+  W: "up", A: "left", S: "down", D: "right"
+};
+
+function onKey(e) {
+  if (dlgKind) { dlgKeys(e); return; }
+  if (e.altKey || e.ctrlKey || e.metaKey) return;
+  var k = e.key;
+  if (k === "Escape") {
+    e.preventDefault();
+    if (current === "s-game") pauseGame();
+    else if (current !== "s-title") show("s-title");
+    return;
+  }
+  if (current !== "s-game") return;
+  var mv = KEYMAP[k];
+  if (mv) { e.preventDefault(); act(mv); return; }
+  if (k === " " || k === "Spacebar") { e.preventDefault(); act("wait"); return; }
+  if (k === "Enter") { e.preventDefault(); doRewind(false); return; }
+  if (k === "Backspace") { e.preventDefault(); restartLevel(); return; }
+}
+
+var sw = null;
+function onDown(e) { sw = { x: e.clientX, y: e.clientY }; }
+function onUp(e) {
+  if (!sw) return;
+  var dx = e.clientX - sw.x, dy = e.clientY - sw.y;
+  sw = null;
+  var ax = Math.abs(dx), ay = Math.abs(dy);
+  if (ax < 24 && ay < 24) return;
+  act(ax > ay ? (dx > 0 ? "right" : "left") : (dy > 0 ? "down" : "up"));
+}
+
+/* ---------- boot ---------- */
+function boot() {
+  modal = $("modal"); dlg = $("dlg"); board = $("board");
+  loadState();
+
+  $("b-play").addEventListener("click", function () {
+    var u = unlockedCount();
+    startLevel(mem.best[LEVELS[0].id] ? Math.min(u - 1, LEVELS.length - 1) : 0);
+  });
+  $("b-how").addEventListener("click", function () { show("s-how"); });
+  $("b-levels").addEventListener("click", function () { show("s-levels"); });
+  $("b-how-back").addEventListener("click", function () { show("s-title"); });
+  $("b-lv-back").addEventListener("click", function () { show("s-title"); });
+  $("b-how-play").addEventListener("click", function () {
+    if (run) show("s-game"); else startLevel(0);
+  });
+  $("b-reset").addEventListener("click", function () {
+    openDlg("confirm", {
+      title: "Reset progress?",
+      text: "This clears every best score and re-locks the levels.",
+      buttons: [
+        { label: "Reset", cls: "pri", act: function () {
+            mem.best = {}; saveState(); closeDlg(); renderLevels(); say("Progress reset.");
+          } },
+        { label: "Cancel", act: closeDlg }
+      ]
+    });
+  });
+  $("b-rewind").addEventListener("click", function () { doRewind(false); });
+  $("b-restart").addEventListener("click", function () { restartLevel(); });
+  $("b-pause").addEventListener("click", function () { pauseGame(); });
+  $("b-help").addEventListener("click", function () { show("s-how"); });
+
+  var pads = $("pad").querySelectorAll("button[data-move]"), i;
+  for (i = 0; i < pads.length; i++) {
+    pads[i].addEventListener("click", function (ev) {
+      act(ev.currentTarget.getAttribute("data-move"));
+    });
+  }
+
+  document.addEventListener("keydown", onKey);
+  board.addEventListener("pointerdown", onDown);
+  board.addEventListener("pointerup", onUp);
+  board.addEventListener("pointercancel", function () { sw = null; });
+  window.addEventListener("resize", fitBoard);
+  if (window.ResizeObserver) {
+    var ro = new window.ResizeObserver(function () { fitBoard(); });
+    ro.observe($("boardwrap"));
+  }
+  modal.addEventListener("click", function (e) {
+    if (e.target === modal && (dlgKind === "pause" || dlgKind === "confirm")) closeDlg();
+  });
+
+  if (!storeOK) $("titlefoot").textContent = "Arrow keys, WASD, or the on-screen buttons. Scores are not saved in this browser.";
+  show("s-title");
+}
+
+if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+else boot();
+</script>
+</body>
+</html>

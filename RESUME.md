@@ -49,31 +49,16 @@ compliance), `tools/judge-brief.md` (the blind rubric to hand a judging sub-agen
 
 ## Next actions, in order
 
-1. **Regenerate Paradox Loop, twice.** It scored highest on originality in `ideas/shortlist.md` and has no
-   build at all, so it is the biggest open question in the whole exercise. Fresh sub-agent per run, entire
-   input = `candidates/r1-paradox-loop/prompt.md` verbatim plus one line naming the working directory
-   (`candidates/r1-paradox-loop/run-1` and `run-2`, cleared first). No follow-ups, no fixes from you.
-   Validate each with `node tools/validate.js <runDir>`. Commit after each.
-2. **Blind-judge all six builds.** One judging sub-agent per build. It gets only `tools/judge-brief.md`,
-   the build's `prompt.md`, its `index.html`, and its screenshots from `run-N/shots/` — never your notes,
-   never which candidate or round it is. Store its JSON as `run-N/judge.json`, merge with the automated
-   report into `candidates/<slug>/eval.json`. Commit after each.
-3. **Write round 1 into `LOG.md`**: per candidate — prompt length, automated pass/fail, the five rubric
-   scores, weighted total, how far the two runs diverged in key features, and the one change you will make.
-4. **Round 2.** Drop the weakest candidate. Apply **one class of change per candidate** so improvements are
-   attributable (see Phase 5 in the original brief, restated in `DECISIONS.md` context): broken → tighten
-   self-verification and state specification; low reproducibility → make key features more explicit; low UX
-   → concrete design direction; low originality → swap in a fallback concept from `ideas/shortlist.md`
-   rather than polishing a weak idea; prompt too long → cut anything the agent did unprompted.
-   `r1-bloom` at 8 630 characters is the obvious candidate for the economy cut — "úsporně" is scored.
-5. **Stop** when five rounds are done, or the best weighted score has not improved for two consecutive
-   rounds, whichever is first.
-6. **Assemble `FINAL/`**: `prompt.md` (verify ≤ 10 000 chars and no code with `checkprompt.js`),
-   `index.html` (**one actual run output, picked, never merged or edited**), `meta.md` (agent name, exact
-   model version string, tooling, settings, run duration), `description.md` (short description of the game
-   and its functionality — Czech first, English underneath), `REPORT.md` (concept, final weighted score,
-   reproducibility across every run of the final prompt, known weaknesses, and what to double-check before
-   submitting).
+**The loop was stopped by the user on 6 September 2026 to stop consuming usage limits.** `FINAL/` is
+assembled with all three games and is submittable as it stands. Nothing below is required; it is what
+would have come next.
+
+1. **Judge `candidates/r2-bloom/run-1`** (built, validated 25/25, never judged). Its agent died saying it
+   was fixing issues it had spotted in its own code, so it is untrusted until scored.
+2. **Run `r2-bloom` a second time** for reproducibility evidence, then judge that too.
+3. If either beats 4.35, swap `FINAL/bloom/` to that prompt and build — **as a pair**, never mixed.
+4. Only then consider a round 3. The binding constraint is originality, which no polish moves; a higher
+   score needs a different idea from `ideas/shortlist.md`, not a better build of these.
 
 ## Standing constraints
 
