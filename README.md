@@ -8,6 +8,14 @@ a complete browser mini-game as a **single `index.html`** — no install, no bui
 Deadline 7 September 2026. Scoring: 25 % theme + runs, 25 % originality, 20 % UX, 20 % prompt quality,
 10 % reproducibility on the organiser's own re-run.
 
+## The submission
+
+**[`final submission/`](final%20submission/) is the entry** — Bloom, the build with the Life pattern
+primer, plus the two form fields ready to paste and a full pre-flight. That directory is the only thing
+you need on submission day.
+
+`FINAL/` is the wider package: all three finished games with their prompts, kept for comparison.
+
 ## Status
 
 **Stopped by request during round 2, with a submittable package assembled.** `FINAL/` holds all three
@@ -35,7 +43,8 @@ tools/validate.js           25 automated checks per run (Playwright + headless C
 tools/checkprompt.js        prompt compliance: length, code fences, base64, data URIs
 tools/judge-brief.md        rubric handed to a blind judging agent
 page.txt / terms.txt        source-of-truth text pulled in Step 0
-FINAL/                      submission package — three games, docs, verified working
+FINAL/                      all three finished games with prompts, docs, verified working
+final submission/           THE entry: Bloom with the pattern primer, form fields, pre-flight
 ```
 
 ## Candidates
