@@ -123,3 +123,19 @@ every bud alive at once"* without saying when counting starts. Generation 0 is t
 level 1 (three buds, five seeds) most obviously, which would have taught nothing. The prompt now
 checks from generation 1 onward, which also makes level 1 exactly the blinker lesson it was meant to
 be: plant the blinker rotated, let one step turn it into the row. Found before a single run was spent.
+
+## 2026-09-06 — D18. r3-bloom adds a Life pattern primer; the game was hard to grasp
+Bloom is the chosen submission but the core obstacle is that a player who does not know Conway's
+vocabulary is stuck on the alphabet, not the puzzle — which is also what the round-1 judge meant by the
+back-half difficulty cliff. **The contest forbids hand-editing the generated file**, so the only legal
+route is a prompt change and a regeneration. `candidates/r3-bloom/` adds:
+- a **named pattern catalogue** (still life / oscillator / spaceship) with a plain one-liner each, drawn
+  as small grids **animated by the game's own Life engine** so the primer cannot drift from the game;
+- the primer in *How to play* **and** behind a **Patterns** button beside Hint during play, reference-only
+  so it cannot be mistaken for a solution reveal;
+- each level's brief **naming the pattern it wants in plain words** before any hint is spent.
+
+**Length tradeoff, stated honestly:** 8 351 → 9 580 characters, only 420 under the cap. Economy is part
+of the 20 % prompt score. I judged the trade worth it because the judges' complaint was *redundancy*,
+not length, and I paid for the addition by cutting genuine restatement out of sections 6 and 7. If the
+next judge dings prompt quality for length, the primer bullet is the first thing to compress further.
