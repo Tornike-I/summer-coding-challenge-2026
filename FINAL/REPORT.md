@@ -74,9 +74,10 @@ nothing checkable; telling it *how to know* produces levels that are provably so
    and that the organiser "runs the same prompt once", but never says whose. All three prompts were
    written to be agent- and model-agnostic — no Claude Code specifics, no assumed CLI, no network — so
    they should survive a re-run elsewhere. Worth a sanity read before sending.
-2. **Run durations.** Only paradox-loop has a clean measured run (51 min, inside the 60-minute cap but not
-   comfortably). The Bloom and Districts runs were interrupted by me during their own self-verification,
-   so their true unattended duration is unknown. `meta.md` says so; do not claim otherwise on the form.
+2. **Run durations.** Bloom and paradox-loop each have a clean, complete, unattended run at **51 minutes**
+   — inside the contest's 60-minute cap, but not comfortably. The Districts run was interrupted by me
+   during its own self-verification, so its true duration is unknown. `meta.md` says so; do not claim
+   otherwise on the form.
 3. **The prompt you submit must be the one in the same folder as the `index.html` you submit.** They were
    copied together and verified byte-identical to the raw run; do not mix a prompt from one folder with a
    build from another.
@@ -89,8 +90,14 @@ nothing checkable; telling it *how to know* produces levels that are provably so
 
 ## What was left undone
 
-The loop stopped by request before round 2 completed. `candidates/r2-bloom/` holds a revised prompt and
-one unjudged build. A second `r2-bloom` run and a blind judgement on both would very likely have produced
-a better entry than the 4.35 shipping here — the revised prompt fixes the dim board, the hint scaling, the
-desktop layout, the win overlay, and a degenerate-solution hole where planting straight onto the buds won
-without ever growing.
+**No blind judgement on the shipping Bloom build.** That is the one real gap. Everything else in this
+report is backed by a judge who never knew what they were looking at; `bloom/` is backed by my own
+validation and a hand playthrough. A single judging run would close it.
+
+**No second run of the r3 prompt.** Reproducibility is 10 %, and for Bloom that evidence comes from the
+r1 prompt's two runs (4.25 / 4.35), not from the prompt actually being submitted. The r3 prompt is
+strictly more specific than r1 — more pinned behaviour, more named requirements — so a re-run should land
+closer, not further, but that is an argument rather than a measurement.
+
+The prompt lineage and every intermediate build are in `candidates/`, and `../LOG.md` has the round-by-round
+reasoning if you want to pick it up.
