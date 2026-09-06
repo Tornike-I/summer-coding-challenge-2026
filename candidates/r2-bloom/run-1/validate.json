@@ -1,0 +1,135 @@
+{
+  "runDir": "C:\\Users\\USER\\ccMC\\scc2026\\candidates\\r2-bloom\\run-1",
+  "checks": {
+    "single_file": {
+      "pass": true,
+      "detail": [
+        "index.html"
+      ]
+    },
+    "exists": {
+      "pass": true,
+      "detail": null
+    },
+    "no_remote_urls": {
+      "pass": true,
+      "detail": []
+    },
+    "no_module_script": {
+      "pass": true,
+      "detail": null
+    },
+    "no_fetch_xhr_ws": {
+      "pass": true,
+      "detail": null
+    },
+    "no_import": {
+      "pass": true,
+      "detail": null
+    },
+    "no_external_link_tag": {
+      "pass": true,
+      "detail": null
+    },
+    "no_encoded_asset_blob": {
+      "pass": true,
+      "detail": 0
+    },
+    "has_reduced_motion": {
+      "pass": true,
+      "detail": null
+    },
+    "has_aria_live": {
+      "pass": true,
+      "detail": null
+    },
+    "storage_guarded": {
+      "pass": true,
+      "detail": null
+    },
+    "has_viewport_meta": {
+      "pass": true,
+      "detail": null
+    },
+    "has_lang": {
+      "pass": true,
+      "detail": null
+    },
+    "no_hscroll_375": {
+      "pass": true,
+      "detail": {
+        "sw": 375,
+        "cw": 375,
+        "sh": 667,
+        "ch": 667
+      }
+    },
+    "no_hscroll_1440": {
+      "pass": true,
+      "detail": {
+        "sw": 1440,
+        "cw": 1440,
+        "sh": 900,
+        "ch": 900
+      }
+    },
+    "no_hscroll_320": {
+      "pass": true,
+      "detail": {
+        "sw": 320,
+        "cw": 320,
+        "sh": 640,
+        "ch": 640
+      }
+    },
+    "renders_content": {
+      "pass": true,
+      "detail": 138
+    },
+    "no_nan_on_screen": {
+      "pass": true,
+      "detail": null
+    },
+    "no_undefined_on_screen": {
+      "pass": true,
+      "detail": null
+    },
+    "interaction_changes_state": {
+      "pass": true,
+      "detail": {
+        "clicked": 3
+      }
+    },
+    "no_console_errors": {
+      "pass": true,
+      "detail": []
+    },
+    "no_uncaught_exceptions": {
+      "pass": true,
+      "detail": []
+    },
+    "no_console_warnings": {
+      "pass": true,
+      "detail": []
+    },
+    "survives_storage_failure": {
+      "pass": true,
+      "detail": {
+        "crashes": [],
+        "textLen": 378
+      }
+    },
+    "loads_under_reduced_motion": {
+      "pass": true,
+      "detail": []
+    }
+  },
+  "notes": [],
+  "bytes": 46525,
+  "lines": 1196,
+  "buttonCount": 12,
+  "firstScreenText": "Bloom\n\nPlant a few seeds, press Grow, and let Conway’s Life carry them to every bud at once.\n\nPlay\nHow to play\nLevels\n\n6 gardens, waiting.",
+  "passed": 25,
+  "total": 25,
+  "failed": []
+}

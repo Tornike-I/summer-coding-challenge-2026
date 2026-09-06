@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bloom</title>
+<style>
+:root{
+  --soil:#0a0f0d;
+  --soil-2:#101915;
+  --cell:#1f2e28;
+  --cell-hi:#2c4038;
+  --line:#33463d;
+  --life:#7ef0a5;
+  --life-deep:#1d6c45;
+  --life-glow:rgba(126,240,165,.35);
+  --stone:#6a7570;
+  --stone-2:#4e5854;
+  --bud:#ffc95c;
+  --bud-dim:#8a6a2a;
+  --text:#e9f2ec;
+  --muted:#9db1a6;
+  --danger:#ff9a7a;
+  --focus:#9fd8ff;
+  --panel:#14201b;
+  --panel-2:#1b2a23;
+  --radius:12px;
+  --dur:.18s;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:
+    radial-gradient(120% 90% at 50% -10%, #16241d 0%, var(--soil) 60%) fixed,
+    var(--soil);
+  color:var(--text);
+  font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans",sans-serif;
+  font-size:16px;
+  line-height:1.45;
+  -webkit-text-size-adjust:100%;
+  overflow-x:hidden;
+}
+#app{min-height:100%;display:flex;flex-direction:column}
+.screen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px;gap:14px}
+.screen[hidden]{display:none}
+h1,h2,h3{margin:0;line-height:1.15;font-weight:650}
+p{margin:0}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+/* ---------- buttons ---------- */
+button{font:inherit;color:inherit;font-weight:600}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:.45em;
+  min-height:44px;min-width:44px;padding:.55em 1.05em;
+  background:var(--panel-2);color:var(--text);
+  border:1px solid var(--line);border-radius:10px;
+  cursor:pointer;text-align:center;
+  transition:background var(--dur) ease,border-color var(--dur) ease,transform var(--dur) ease;
+}
+.btn:hover:not(:disabled){background:var(--cell-hi);border-color:var(--life-deep)}
+.btn:active:not(:disabled){transform:translateY(1px)}
+.btn:disabled{opacity:.42;cursor:not-allowed}
+.btn.primary{background:linear-gradient(180deg,#2f8f5f,#1d6c45);border-color:#3fae76;color:#04150c}
+.btn.primary:hover:not(:disabled){background:linear-gradient(180deg,#39a76f,#237c50)}
+.btn.ghost{background:transparent}
+.btn.small{min-height:38px;padding:.35em .7em;font-size:.85rem}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:8px}
+
+/* ---------- title ---------- */
+.title-card{max-width:640px;text-align:center;display:flex;flex-direction:column;gap:18px;align-items:center}
+.wordmark{font-size:clamp(2.6rem,11vw,4.2rem);letter-spacing:.02em;font-weight:700;
+  background:linear-gradient(180deg,#eafff2,var(--life));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hook{color:var(--muted);font-size:clamp(.95rem,3.4vw,1.1rem);max-width:34ch}
+.title-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.sprig{display:block}
+
+/* ---------- generic panels ---------- */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px}
+.subhead{color:var(--muted);font-size:.86rem}
+.screen-head{width:100%;max-width:900px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.scroller{width:100%;max-width:900px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;padding-bottom:4px}
+
+/* ---------- how to play ---------- */
+.rules{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.rule{flex:1 1 200px;min-width:180px;max-width:280px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.rule h3{font-size:.98rem}
+.rule p{color:var(--muted);font-size:.85rem}
+.mini{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;width:130px;padding:5px;background:var(--soil-2);border:1px solid var(--line);border-radius:10px}
+.mini i{display:block;aspect-ratio:1;border-radius:3px;background:var(--cell)}
+.mini i.on{background:var(--life);box-shadow:0 0 6px var(--life-glow)}
+.mini i.born{background:var(--life);animation:mBorn 2.4s steps(1,end) infinite}
+.mini i.dies{background:var(--life);animation:mDies 2.4s steps(1,end) infinite}
+.mini i.lives{background:var(--life);animation:mLives 2.4s steps(1,end) infinite}
+@keyframes mBorn{0%,45%{background:var(--cell);box-shadow:none}50%,100%{background:var(--life);box-shadow:0 0 6px var(--life-glow)}}
+@keyframes mDies{0%,45%{background:var(--life);box-shadow:0 0 6px var(--life-glow)}50%,100%{background:var(--cell);box-shadow:none}}
+@keyframes mLives{0%,100%{background:var(--life);box-shadow:0 0 6px var(--life-glow)}}
+.keys{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px 16px;padding:0;margin:0;list-style:none}
+.keys li{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:.88rem}
+kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.78rem;background:var(--panel-2);
+  border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:1px 7px;color:var(--text);min-width:2.1em;text-align:center}
+
+/* ---------- level select ---------- */
+.levels{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.lvl{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;padding:12px 14px;min-height:88px}
+.lvl .lvl-n{font-size:.76rem;letter-spacing:.14em;text-transform:uppercase;color:var(--life)}
+.lvl .lvl-t{font-size:1.02rem;font-weight:650}
+.lvl .lvl-b{font-size:.82rem;color:var(--muted);font-weight:500}
+.lvl:disabled{opacity:.55}
+.lvl:disabled .lvl-n{color:var(--muted)}
+
+/* ---------- game layout ---------- */
+.game{justify-content:flex-start;gap:10px;padding:10px}
+.gamewrap{width:100%;max-width:1180px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.boardcol{display:flex;flex-direction:column;gap:8px;align-items:center;width:100%}
+.sidecol{width:100%;max-width:520px;display:flex;flex-direction:column;gap:10px}
+
+.statusbar{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;width:100%;max-width:520px}
+.chip{display:inline-flex;align-items:baseline;gap:.4em;background:var(--panel);border:1px solid var(--line);
+  border-radius:999px;padding:.25em .7em;font-size:.8rem;color:var(--muted);white-space:nowrap}
+.chip b{color:var(--text);font-variant-numeric:tabular-nums;font-weight:650}
+.chip.warn b{color:var(--danger)}
+.chip.good b{color:var(--life)}
+
+/* ---------- board ---------- */
+.board{
+  --n:12;
+  display:grid;
+  grid-template-columns:repeat(var(--n),1fr);
+  gap:2px;padding:6px;
+  width:min(94vw, 520px, calc(100vh - 300px));
+  aspect-ratio:1;
+  background:var(--soil-2);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  touch-action:none;
+  cursor:crosshair;
+  box-shadow:inset 0 0 40px rgba(0,0,0,.55);
+}
+.board:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+.cellwrap{position:relative;background:var(--cell);border-radius:3px;overflow:hidden}
+.cellwrap::after{content:"";position:absolute;inset:0;border-radius:3px;border:1px solid rgba(255,255,255,.05);pointer-events:none}
+.cellwrap.stone{background:var(--stone-2);
+  background-image:repeating-linear-gradient(135deg,var(--stone) 0 2px,transparent 2px 5px);
+  cursor:not-allowed}
+.dot{position:absolute;inset:11%;border-radius:50%;background:var(--life);
+  box-shadow:0 0 8px var(--life-glow);
+  transform:scale(0);opacity:0;
+  transition:transform var(--dur) ease-out,opacity var(--dur) ease-out}
+.cellwrap.alive .dot{transform:scale(1);opacity:1}
+/* buds: hollow ring when unlit, filled + inner square when lit -> shape differs, not only colour */
+.bud{position:absolute;inset:6%;border-radius:50%;border:2px solid var(--bud-dim);pointer-events:none}
+.cellwrap.bud-cell .bud{border-color:var(--bud)}
+.cellwrap.bud-cell.alive .bud{border-color:#fff0c9;background:rgba(255,201,92,.16)}
+.bud::before{content:"";position:absolute;inset:22%;background:var(--bud);
+  transform:rotate(45deg) scale(0);opacity:0;
+  transition:transform var(--dur) ease-out,opacity var(--dur) ease-out}
+.cellwrap.bud-cell.alive .bud::before{transform:rotate(45deg) scale(1);opacity:1}
+.cellwrap.bud-cell.alive{background:var(--life-deep)}
+.cellwrap.seeded .dot{background:#b9ffd6}
+.hintmark{position:absolute;inset:18%;border:2px dashed var(--focus);border-radius:4px;pointer-events:none;opacity:.95}
+.cellwrap.cursor{box-shadow:inset 0 0 0 2px var(--focus)}
+.board.planting .cellwrap:not(.stone):hover{background:var(--cell-hi)}
+.cellwrap.refuse{animation:refuse .3s ease}
+@keyframes refuse{0%,100%{transform:translateX(0)}25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
+.board.won{box-shadow:0 0 0 2px var(--bud),0 0 34px rgba(255,201,92,.28),inset 0 0 40px rgba(0,0,0,.5)}
+.board.won .cellwrap.bud-cell{animation:pop .6s ease}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.18)}100%{transform:scale(1)}}
+
+/* ---------- controls ---------- */
+.controls{display:flex;flex-wrap:wrap;gap:8px}
+.controls .btn{flex:1 1 auto}
+.dialog{border:1px solid var(--line);border-radius:var(--radius);padding:14px;display:flex;flex-direction:column;gap:10px;
+  background:linear-gradient(180deg,var(--panel-2),var(--panel))}
+.dialog[hidden]{display:none}
+.dialog h2{font-size:1.15rem}
+.dialog .row{display:flex;flex-wrap:wrap;gap:8px}
+.dialog .row .btn{flex:1 1 130px}
+.scoreline{display:flex;flex-wrap:wrap;gap:6px}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:.78rem;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.sw{width:14px;height:14px;border-radius:3px;background:var(--cell);border:1px solid rgba(255,255,255,.08);position:relative;flex:none}
+.sw.l{background:var(--life)}
+.sw.s{background:var(--stone-2);background-image:repeating-linear-gradient(135deg,var(--stone) 0 2px,transparent 2px 5px)}
+.sw.b{background:transparent;border:2px solid var(--bud);border-radius:50%}
+.livebar{min-height:1.3em;font-size:.85rem;color:var(--bud)}
+
+/* ---------- finale ---------- */
+.finale{text-align:center;gap:16px}
+.finale .wordmark{font-size:clamp(2rem,8vw,3rem)}
+
+@media (min-width:900px){
+  .gamewrap{flex-direction:row;align-items:flex-start;justify-content:center;gap:22px}
+  .boardcol{width:auto}
+  .board{width:min(58vw, 620px, calc(100vh - 130px))}
+  .sidecol{width:340px;max-width:340px;flex:none;padding-top:2px}
+  .statusbar{max-width:none}
+}
+@media (max-width:899px){
+  #level-title,#level-blurb,#panel-controls .keys,#panel-controls .legend{display:none}
+  .board{width:min(96vw, 520px, calc(100vh - 244px))}
+  .game{padding:8px}
+  .dialog{padding:11px;gap:8px}
+  .dialog h2{font-size:1.05rem}
+}
+@media (max-width:420px){
+  .btn{padding:.5em .75em}
+  .chip{font-size:.75rem;padding:.2em .6em}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:0s!important;animation-iteration-count:1!important;transition-duration:0s!important}
+  .mini i.born{background:var(--life)}
+  .mini i.dies{background:var(--cell);box-shadow:none}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ================= TITLE ================= -->
+  <section class="screen" id="screen-title">
+    <div class="title-card">
+      <svg class="sprig" width="74" height="74" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+        <path d="M24 44V18" stroke="#2f8f5f" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <path d="M24 30C24 30 14 29 12 20c9 0 12 10 12 10Z" fill="#1d6c45"/>
+        <path d="M24 26C24 26 34 25 36 16c-9 0-12 10-12 10Z" fill="#2f8f5f"/>
+        <circle cx="24" cy="12" r="6.5" fill="none" stroke="#ffc95c" stroke-width="2.5"/>
+        <rect x="21" y="9" width="6" height="6" transform="rotate(45 24 12)" fill="#ffc95c"/>
+      </svg>
+      <h1 class="wordmark">Bloom</h1>
+      <p class="hook">Plant a few seeds, press Grow, and let Conway&rsquo;s Life carry them to every bud at once.</p>
+      <div class="title-actions">
+        <button class="btn primary" id="btn-play" type="button">Play</button>
+        <button class="btn" id="btn-howto" type="button">How to play</button>
+        <button class="btn ghost" id="btn-levels" type="button">Levels</button>
+      </div>
+      <p class="subhead" id="title-progress">&nbsp;</p>
+    </div>
+  </section>
+
+  <!-- ================= HOW TO PLAY ================= -->
+  <section class="screen" id="screen-howto" hidden>
+    <div class="screen-head">
+      <h2>How to play</h2>
+      <button class="btn small" data-back="title" type="button">Back</button>
+    </div>
+    <div class="scroller">
+      <div class="card">
+        <p class="subhead" style="margin-bottom:10px">Two rules run the whole garden. Every cell counts its eight neighbours.</p>
+        <div class="rules">
+          <div class="rule">
+            <div class="mini" aria-hidden="true">
+              <i></i><i></i><i></i><i></i><i></i>
+              <i></i><i></i><i class="on"></i><i></i><i></i>
+              <i></i><i class="on"></i><i class="born"></i><i></i><i></i>
+              <i></i><i></i><i class="on"></i><i></i><i></i>
+              <i></i><i></i><i></i><i></i><i></i>
+            </div>
+            <h3>Three neighbours &rarr; a birth</h3>
+            <p>An empty cell with exactly three live neighbours comes to life.</p>
+          </div>
+          <div class="rule">
+            <div class="mini" aria-hidden="true">
+              <i></i><i></i><i></i><i></i><i></i>
+              <i></i><i></i><i class="on"></i><i></i><i></i>
+              <i></i><i></i><i class="lives"></i><i></i><i></i>
+              <i></i><i></i><i class="on"></i><i></i><i></i>
+              <i></i><i></i><i></i><i></i><i></i>
+            </div>
+            <h3>Two or three &rarr; it lives</h3>
+            <p>A live cell with two or three live neighbours survives the generation.</p>
+          </div>
+          <div class="rule">
+            <div class="mini" aria-hidden="true">
+              <i></i><i></i><i></i><i></i><i></i>
+              <i></i><i></i><i></i><i></i><i></i>
+              <i></i><i></i><i class="dies"></i><i></i><i></i>
+              <i></i><i></i><i></i><i></i><i></i>
+              <i></i><i></i><i></i><i></i><i></i>
+            </div>
+            <h3>Anything else &rarr; it dies</h3>
+            <p>Alone or crowded, the cell dies. Nothing lives outside the garden wall.</p>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>The game</h3>
+        <p class="subhead" style="margin-top:6px">Each level marks a few <b style="color:var(--bud)">buds</b> and gives you a small handful of seeds. Plant them, press&nbsp;Grow, and you win the moment a single generation has <em>every</em> bud alive at the same time. The count starts at generation&nbsp;1, so planting straight onto the buds is never enough. Extra life elsewhere is fine.</p>
+        <p class="subhead" style="margin-top:8px"><b>Stone</b> is bare rock: you can never plant on it, but life spreads across it exactly as it does anywhere else.</p>
+        <p class="subhead" style="margin-top:8px"><b>Reset</b> puts the garden back to your planting with the seeds still in place, so you can move one cell instead of starting over. A <b>Hint</b> reveals one cell of a known solution and costs 5 score.</p>
+        <div class="legend" style="margin-top:10px">
+          <span><i class="sw"></i>empty soil</span>
+          <span><i class="sw l"></i>living cell</span>
+          <span><i class="sw b"></i>bud (ring)</span>
+          <span><i class="sw s"></i>stone</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Controls</h3>
+        <ul class="keys" style="margin-top:8px">
+          <li><kbd>&larr;&uarr;&darr;&rarr;</kbd> move the cursor</li>
+          <li><kbd>Enter</kbd> <kbd>Space</kbd> plant or lift a seed</li>
+          <li><kbd>G</kbd> grow / pause</li>
+          <li><kbd>S</kbd> one step</li>
+          <li><kbd>R</kbd> reset to your planting</li>
+          <li><kbd>H</kbd> hint</li>
+          <li><kbd>Esc</kbd> pause / back</li>
+          <li>Drag with a finger or mouse to plant several</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= LEVEL SELECT ================= -->
+  <section class="screen" id="screen-levels" hidden>
+    <div class="screen-head">
+      <h2>Levels</h2>
+      <button class="btn small" data-back="title" type="button">Back</button>
+    </div>
+    <div class="scroller">
+      <div class="levels" id="level-list"></div>
+      <p class="subhead" id="levels-note"></p>
+    </div>
+  </section>
+
+  <!-- ================= GAME ================= -->
+  <section class="screen game" id="screen-game" hidden>
+    <div class="gamewrap">
+      <div class="boardcol">
+        <div class="statusbar" id="statusbar"></div>
+        <div class="board" id="board" role="grid" tabindex="0" aria-label="Garden grid"></div>
+      </div>
+      <div class="sidecol">
+        <div id="panel-controls">
+          <h2 id="level-title" style="font-size:1.05rem;margin-bottom:2px">Level</h2>
+          <p class="subhead" id="level-blurb" style="margin-bottom:10px"></p>
+          <div class="controls">
+            <button class="btn primary" id="btn-grow" type="button">Grow</button>
+            <button class="btn" id="btn-step" type="button">Step</button>
+            <button class="btn" id="btn-reset" type="button">Reset</button>
+          </div>
+          <div class="controls" style="margin-top:8px">
+            <button class="btn" id="btn-hint" type="button">Hint</button>
+            <button class="btn ghost" id="btn-quit" type="button">Levels</button>
+          </div>
+          <p class="livebar" id="livebar"></p>
+          <div class="legend" style="margin-top:6px">
+            <span><i class="sw"></i>soil</span>
+            <span><i class="sw l"></i>alive</span>
+            <span><i class="sw b"></i>bud</span>
+            <span><i class="sw s"></i>stone</span>
+          </div>
+          <ul class="keys" style="margin-top:10px">
+            <li><kbd>&larr;&uarr;&darr;&rarr;</kbd> cursor</li>
+            <li><kbd>Enter</kbd> seed</li>
+            <li><kbd>G</kbd> grow</li>
+            <li><kbd>S</kbd> step</li>
+            <li><kbd>R</kbd> reset</li>
+            <li><kbd>H</kbd> hint</li>
+            <li><kbd>Esc</kbd> pause</li>
+          </ul>
+        </div>
+        <div class="dialog" id="panel-dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" hidden>
+          <h2 id="dialog-title">&nbsp;</h2>
+          <div id="dialog-body"></div>
+          <div class="row" id="dialog-actions"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FINALE ================= -->
+  <section class="screen finale" id="screen-finale" hidden>
+    <div class="title-card">
+      <svg width="86" height="86" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+        <circle cx="24" cy="24" r="15" fill="none" stroke="#ffc95c" stroke-width="2"/>
+        <circle cx="24" cy="24" r="9" fill="none" stroke="#7ef0a5" stroke-width="2"/>
+        <rect x="19" y="19" width="10" height="10" transform="rotate(45 24 24)" fill="#ffc95c"/>
+      </svg>
+      <h1 class="wordmark">The garden is full</h1>
+      <p class="hook">Every bud lit, in every bed. Six patterns you engineered out of two rules and a handful of seeds.</p>
+      <div class="card" id="finale-scores" style="width:100%;max-width:460px;text-align:left"></div>
+      <div class="title-actions">
+        <button class="btn primary" data-back="levels" type="button">Back to levels</button>
+        <button class="btn ghost" data-back="title" type="button">Title</button>
+      </div>
+    </div>
+  </section>
+
+  <p id="live" class="sr-only" role="status" aria-live="polite"></p>
+</div>
+<script>
+"use strict";
+
+var STORE_KEY = "bloom.v1";
+var TICK_MS = 250;
+var HINT_PENALTY = 5;
+
+var LEVELS = [
+  {
+    name: "First Light",
+    blurb: "Three buds in a row. Something that flips back and forth will do it.",
+    n: 12, seeds: 5, limit: 10, hints: 2,
+    stone: [],
+    buds: [[6,5],[6,6],[6,7]],
+    sol: [[5,6],[6,6],[7,6]]
+  },
+  {
+    name: "The Traveller",
+    blurb: "The buds are nowhere near your seeds. Some patterns walk.",
+    n: 14, seeds: 6, limit: 20, hints: 3,
+    stone: [],
+    buds: [[5,6],[6,7],[7,5],[7,6],[7,7]],
+    sol: [[2,3],[3,4],[4,2],[4,3],[4,4]]
+  },
+  {
+    name: "Crossfire",
+    blurb: "Neither half gets there alone. Two small starts have to meet.",
+    n: 13, seeds: 7, limit: 16, hints: 4,
+    stone: [],
+    buds: [[4,6],[4,7],[5,8],[6,6],[6,7]],
+    sol: [[5,3],[5,4],[5,5],[5,7],[6,6],[7,6]]
+  },
+  {
+    name: "Stonebed",
+    blurb: "The buds lie in bare rock. You cannot plant anywhere near them.",
+    n: 14, seeds: 6, limit: 24, hints: 4,
+    stone: (function () {
+      var s = [];
+      for (var r = 4; r <= 8; r++) for (var c = 5; c <= 9; c++) s.push([r, c]);
+      return s;
+    })(),
+    buds: [[5,7],[6,6],[7,6],[7,7],[7,8]],
+    sol: [[1,11],[2,10],[3,10],[3,11],[3,12]]
+  },
+  {
+    name: "Exact Change",
+    blurb: "Four seeds, four buds, no spares. One small shape reaches all four.",
+    n: 14, seeds: 4, limit: 16, hints: 3,
+    stone: [],
+    buds: [[2,6],[6,2],[6,10],[10,6]],
+    sol: [[6,5],[6,6],[6,7],[7,6]]
+  },
+  {
+    name: "Two Moons",
+    blurb: "A long run. Two clusters have to arrive in the very same generation.",
+    n: 16, seeds: 9, limit: 30, hints: 6,
+    stone: [],
+    buds: [[4,6],[5,5],[5,7],[10,5],[10,7],[11,6]],
+    sol: [[1,2],[2,3],[3,1],[3,2],[3,3],[7,6],[7,7],[7,8]]
+  }
+];
+
+function $(id) { return document.getElementById(id); }
+
+var screens = {
+  title: $("screen-title"),
+  howto: $("screen-howto"),
+  levels: $("screen-levels"),
+  game: $("screen-game"),
+  finale: $("screen-finale")
+};
+var board = $("board");
+var statusbar = $("statusbar");
+var livebar = $("livebar");
+var liveRegion = $("live");
+var panelControls = $("panel-controls");
+var dlg = $("panel-dialog");
+var dlgTitle = $("dialog-title");
+var dlgBody = $("dialog-body");
+var dlgActions = $("dialog-actions");
+var btnGrow = $("btn-grow");
+var btnStep = $("btn-step");
+var btnReset = $("btn-reset");
+var btnHint = $("btn-hint");
+
+/* ---- progress, memory-backed so a dead localStorage never breaks play ---- */
+var progress = { unlocked: 1, best: {} };
+
+function loadProgress() {
+  var p = { unlocked: 1, best: {} };
+  try {
+    var raw = window.localStorage.getItem(STORE_KEY);
+    if (!raw) return p;
+    var o = JSON.parse(raw);
+    if (!o || typeof o !== "object") return p;
+    if (typeof o.unlocked === "number" && isFinite(o.unlocked)) {
+      p.unlocked = Math.max(1, Math.min(LEVELS.length, Math.floor(o.unlocked)));
+    }
+    if (o.best && typeof o.best === "object") {
+      for (var i = 0; i < LEVELS.length; i++) {
+        var b = o.best[i];
+        if (!b || typeof b !== "object") continue;
+        if (typeof b.seeds !== "number" || typeof b.gens !== "number" || typeof b.score !== "number") continue;
+        if (!isFinite(b.seeds) || !isFinite(b.gens) || !isFinite(b.score)) continue;
+        p.best[i] = {
+          seeds: Math.max(0, Math.floor(b.seeds)),
+          gens: Math.max(0, Math.floor(b.gens)),
+          hints: typeof b.hints === "number" && isFinite(b.hints) ? Math.max(0, Math.floor(b.hints)) : 0,
+          score: Math.max(0, Math.floor(b.score))
+        };
+      }
+    }
+  } catch (e) { return { unlocked: 1, best: {} }; }
+  return p;
+}
+
+function saveProgress() {
+  try { window.localStorage.setItem(STORE_KEY, JSON.stringify(progress)); } catch (e) { /* memory only */ }
+}
+
+/* ---- life ---- */
+function stepCells(src, n) {
+  var out = new Uint8Array(n * n);
+  for (var r = 0; r < n; r++) {
+    for (var c = 0; c < n; c++) {
+      var count = 0;
+      for (var dr = -1; dr <= 1; dr++) {
+        var rr = r + dr;
+        if (rr < 0 || rr >= n) continue;
+        for (var dc = -1; dc <= 1; dc++) {
+          if (dr === 0 && dc === 0) continue;
+          var cc = c + dc;
+          if (cc < 0 || cc >= n) continue;
+          count += src[rr * n + cc];
+        }
+      }
+      var i = r * n + c;
+      out[i] = src[i] ? (count === 2 || count === 3 ? 1 : 0) : (count === 3 ? 1 : 0);
+    }
+  }
+  return out;
+}
+
+/* ---- state ---- */
+var state = null;
+var cellEls = [];
+var timer = null;
+var currentScreen = "title";
+var painting = null;
+var lastRefusal = { msg: "", at: 0 };
+
+function stopClock() {
+  if (timer !== null) { clearInterval(timer); timer = null; }
+  if (state) state.running = false;
+}
+
+function say(msg) {
+  liveRegion.textContent = msg;
+  livebar.textContent = msg;
+}
+
+function refuse(msg, el) {
+  var now = Date.now();
+  if (msg !== lastRefusal.msg || now - lastRefusal.at > 900) {
+    lastRefusal = { msg: msg, at: now };
+    say(msg);
+  }
+  if (el) {
+    el.classList.remove("refuse");
+    void el.offsetWidth;
+    el.classList.add("refuse");
+  }
+}
+
+function showScreen(name) {
+  stopClock();
+  for (var k in screens) {
+    if (Object.prototype.hasOwnProperty.call(screens, k)) screens[k].hidden = (k !== name);
+  }
+  currentScreen = name;
+  if (name === "title") renderTitle();
+  if (name === "levels") renderLevelList();
+  if (name === "finale") renderFinale();
+  window.scrollTo(0, 0);
+}
+
+/* ---- title ---- */
+function levelsDone() {
+  var n = 0;
+  for (var i = 0; i < LEVELS.length; i++) if (progress.best[i]) n++;
+  return n;
+}
+
+function renderTitle() {
+  var done = levelsDone();
+  $("title-progress").textContent = done === 0
+    ? "6 gardens, waiting."
+    : done + " of " + LEVELS.length + " gardens in bloom.";
+}
+
+/* ---- level select ---- */
+function bestText(i) {
+  var b = progress.best[i];
+  if (!b) return "—";
+  return b.seeds + " seed" + (b.seeds === 1 ? "" : "s") + " · " + b.gens + " gen" + (b.gens === 1 ? "" : "s") + " · score " + b.score;
+}
+
+function renderLevelList() {
+  var list = $("level-list");
+  list.replaceChildren();
+  for (var i = 0; i < LEVELS.length; i++) {
+    (function (idx) {
+      var L = LEVELS[idx];
+      var locked = idx + 1 > progress.unlocked;
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "btn lvl";
+      b.disabled = locked;
+      var n1 = document.createElement("span");
+      n1.className = "lvl-n";
+      n1.textContent = "Level " + (idx + 1) + (locked ? " · locked" : "");
+      var n2 = document.createElement("span");
+      n2.className = "lvl-t";
+      n2.textContent = locked ? "— — —" : L.name;
+      var n3 = document.createElement("span");
+      n3.className = "lvl-b";
+      n3.textContent = locked
+        ? "Solve level " + idx + " to open this bed."
+        : L.buds.length + " buds · " + L.seeds + " seeds · " + L.limit + " gens · best: " + bestText(idx);
+      b.appendChild(n1); b.appendChild(n2); b.appendChild(n3);
+      if (locked) b.setAttribute("aria-disabled", "true");
+      b.addEventListener("click", function () { startLevel(idx); });
+      list.appendChild(b);
+    })(i);
+  }
+  var note = $("levels-note");
+  note.replaceChildren();
+  var t = document.createTextNode(levelsDone() === LEVELS.length
+    ? "Every bed is in bloom. "
+    : "Lower score is better: seeds + generations, plus " + HINT_PENALTY + " for each hint.");
+  note.appendChild(t);
+  if (levelsDone() === LEVELS.length) {
+    var eb = document.createElement("button");
+    eb.type = "button";
+    eb.className = "btn small";
+    eb.textContent = "See the ending";
+    eb.addEventListener("click", function () { showScreen("finale"); });
+    note.appendChild(eb);
+  }
+}
+
+function renderFinale() {
+  var box = $("finale-scores");
+  box.replaceChildren();
+  var total = 0;
+  for (var i = 0; i < LEVELS.length; i++) {
+    var row = document.createElement("p");
+    row.className = "subhead";
+    var b = progress.best[i];
+    if (b) total += b.score;
+    row.textContent = (i + 1) + ". " + LEVELS[i].name + " — " + bestText(i);
+    box.appendChild(row);
+  }
+  var tot = document.createElement("p");
+  tot.style.marginTop = "8px";
+  tot.textContent = "Total score: " + total;
+  box.appendChild(tot);
+}
+
+/* ---- board ---- */
+function idxOf(L, r, c) { return r * L.n + c; }
+
+function buildBoard(L) {
+  board.replaceChildren();
+  board.style.setProperty("--n", String(L.n));
+  board.setAttribute("aria-label", "Garden grid, " + L.n + " by " + L.n);
+  cellEls = new Array(L.n * L.n);
+  var stoneSet = state.stone, budSet = state.budSet;
+  var frag = document.createDocumentFragment();
+  for (var r = 0; r < L.n; r++) {
+    for (var c = 0; c < L.n; c++) {
+      var i = r * L.n + c;
+      var el = document.createElement("div");
+      el.className = "cellwrap";
+      el.id = "bc" + i;
+      el.dataset.i = String(i);
+      el.setAttribute("role", "gridcell");
+      if (stoneSet.has(i)) el.classList.add("stone");
+      if (budSet.has(i)) el.classList.add("bud-cell");
+      var dot = document.createElement("span");
+      dot.className = "dot";
+      el.appendChild(dot);
+      if (budSet.has(i)) {
+        var bd = document.createElement("span");
+        bd.className = "bud";
+        el.appendChild(bd);
+      }
+      el.setAttribute("aria-label", describe(i));
+      cellEls[i] = el;
+      frag.appendChild(el);
+    }
+  }
+  board.appendChild(frag);
+}
+
+function describe(i) {
+  var L = LEVELS[state.li];
+  var r = Math.floor(i / L.n), c = i % L.n;
+  var bits = ["row " + (r + 1) + " column " + (c + 1)];
+  if (state.stone.has(i)) bits.push("stone");
+  if (state.budSet.has(i)) bits.push(state.cells[i] ? "bud lit" : "bud unlit");
+  else bits.push(state.cells[i] ? "alive" : "empty");
+  if (state.seeds.has(i) && state.phase === "plant") bits.push("seeded");
+  if (state.revealed.has(i)) bits.push("hint");
+  return bits.join(", ");
+}
+
+function renderCells() {
+  var planting = state.phase === "plant";
+  board.classList.toggle("planting", planting);
+  for (var i = 0; i < cellEls.length; i++) {
+    var el = cellEls[i];
+    var alive = state.cells[i] === 1;
+    if (el.classList.contains("alive") !== alive) el.classList.toggle("alive", alive);
+    var seeded = planting && state.seeds.has(i);
+    if (el.classList.contains("seeded") !== seeded) el.classList.toggle("seeded", seeded);
+  }
+  renderHints();
+  renderCursor();
+}
+
+function renderHints() {
+  state.revealed.forEach(function (i) {
+    var el = cellEls[i];
+    if (el && !el.querySelector(".hintmark")) {
+      var m = document.createElement("span");
+      m.className = "hintmark";
+      el.appendChild(m);
+    }
+  });
+}
+
+var lastCursor = -1;
+function renderCursor() {
+  if (lastCursor >= 0 && cellEls[lastCursor]) cellEls[lastCursor].classList.remove("cursor");
+  var i = state.cursor;
+  if (cellEls[i]) {
+    cellEls[i].classList.add("cursor");
+    cellEls[i].setAttribute("aria-label", describe(i));
+    board.setAttribute("aria-activedescendant", "bc" + i);
+  }
+  lastCursor = i;
+}
+
+function budsLit() {
+  var n = 0;
+  for (var i = 0; i < state.buds.length; i++) if (state.cells[state.buds[i]]) n++;
+  return n;
+}
+
+function chip(label, value, cls) {
+  var s = document.createElement("span");
+  s.className = "chip" + (cls ? " " + cls : "");
+  s.appendChild(document.createTextNode(label + " "));
+  var b = document.createElement("b");
+  b.textContent = value;
+  s.appendChild(b);
+  return s;
+}
+
+function updateStatus() {
+  var L = LEVELS[state.li];
+  statusbar.replaceChildren();
+  var lvl = document.createElement("span");
+  lvl.className = "chip";
+  var lb = document.createElement("b");
+  lb.textContent = (state.li + 1) + ". " + L.name;
+  lvl.appendChild(lb);
+  statusbar.appendChild(lvl);
+  var left = L.seeds - state.seeds.size;
+  statusbar.appendChild(chip("seeds left", String(left), left === 0 ? "warn" : ""));
+  statusbar.appendChild(chip("gen", state.gen + " / " + L.limit, state.gen >= L.limit ? "warn" : ""));
+  var lit = budsLit();
+  statusbar.appendChild(chip("buds", lit + " / " + state.buds.length, lit === state.buds.length ? "good" : ""));
+  var hleft = L.hints - state.hintsUsed;
+  statusbar.appendChild(chip("hints", String(hleft), ""));
+
+  var planting = state.phase === "plant";
+  var over = state.phase === "won" || state.phase === "lost";
+  btnGrow.textContent = state.running ? "Pause" : (planting ? "Grow" : "Resume");
+  btnGrow.disabled = over || (state.gen >= L.limit && !state.running);
+  btnStep.disabled = over || state.gen >= L.limit;
+  btnReset.disabled = state.phase === "plant" && state.gen === 0 && state.seeds.size === 0;
+  btnHint.disabled = over || hleft <= 0;
+  btnHint.textContent = hleft > 0 ? "Hint (" + hleft + ")" : "No hints left";
+}
+
+/* ---- level lifecycle ---- */
+function startLevel(li) {
+  var L = LEVELS[li];
+  state = {
+    li: li,
+    phase: "plant",
+    running: false,
+    gen: 0,
+    cells: new Uint8Array(L.n * L.n),
+    seeds: new Set(),
+    stone: new Set(L.stone.map(function (p) { return idxOf(L, p[0], p[1]); })),
+    budSet: new Set(L.buds.map(function (p) { return idxOf(L, p[0], p[1]); })),
+    buds: L.buds.map(function (p) { return idxOf(L, p[0], p[1]); }),
+    sol: L.sol.map(function (p) { return idxOf(L, p[0], p[1]); }),
+    revealed: new Set(),
+    cursor: Math.floor(L.n / 2) * L.n + Math.floor(L.n / 2),
+    hintsUsed: 0,
+    bestLit: 0,
+    bestLitGen: 0,
+    dialog: false
+  };
+  lastCursor = -1;
+  closeDialog(true);
+  buildBoard(L);
+  board.classList.remove("won");
+  $("level-title").textContent = "Level " + (li + 1) + " · " + L.name;
+  $("level-blurb").textContent = L.blurb;
+  showScreen("game");
+  renderCells();
+  updateStatus();
+  say("Level " + (li + 1) + ", " + L.name + ". " + L.buds.length + " buds, " + L.seeds + " seeds, " + L.limit + " generations.");
+}
+
+function cellsFromSeeds() {
+  var L = LEVELS[state.li];
+  var next = new Uint8Array(L.n * L.n);
+  state.seeds.forEach(function (i) { next[i] = 1; });
+  state.cells = next;
+}
+
+function refusalReason() {
+  if (state.phase === "won") return "This bed is solved — press Retry to replant.";
+  if (state.phase === "lost") return "Out of generations — press Retry to replant.";
+  return "The garden is growing — press Reset to replant.";
+}
+
+function plantAt(i, mode) {
+  var L = LEVELS[state.li];
+  if (state.phase !== "plant") {
+    refuse(refusalReason(), null);
+    return false;
+  }
+  if (state.stone.has(i)) {
+    refuse("That is stone. Nothing takes root there.", cellEls[i]);
+    return false;
+  }
+  if (mode === "remove") {
+    if (!state.seeds.has(i)) return false;
+    state.seeds.delete(i);
+  } else {
+    if (state.seeds.has(i)) return false;
+    if (state.seeds.size >= L.seeds) {
+      refuse("No seeds left — lift one to move it.", cellEls[i]);
+      return false;
+    }
+    state.seeds.add(i);
+  }
+  cellsFromSeeds();
+  renderCells();
+  updateStatus();
+  return true;
+}
+
+function toggleAt(i) {
+  return plantAt(i, state.seeds.has(i) ? "remove" : "add");
+}
+
+function advance() {
+  var L = LEVELS[state.li];
+  if (state.phase === "won" || state.phase === "lost") return;
+  if (state.gen >= L.limit) { lose(); return; }
+  state.phase = "run";
+  state.cells = stepCells(state.cells, L.n);
+  state.gen++;
+  var lit = budsLit();
+  if (lit > state.bestLit) { state.bestLit = lit; state.bestLitGen = state.gen; }
+  renderCells();
+  updateStatus();
+  if (lit === state.buds.length) { winLevel(); return; }
+  if (state.gen >= L.limit) { lose(); return; }
+}
+
+function startGrow() {
+  if (state.phase === "won" || state.phase === "lost") return;
+  var L = LEVELS[state.li];
+  if (state.gen >= L.limit) return;
+  stopClock();
+  state.running = true;
+  timer = setInterval(function () {
+    if (!state || currentScreen !== "game" || state.phase === "won" || state.phase === "lost") { stopClock(); return; }
+    advance();
+  }, TICK_MS);
+  updateStatus();
+  say("Growing.");
+}
+
+function pauseGrow(showPanel) {
+  var was = state.running;
+  stopClock();
+  updateStatus();
+  if (showPanel) openPauseDialog(was);
+  else say("Paused at generation " + state.gen + ".");
+}
+
+function resetToPlanting() {
+  stopClock();
+  closeDialog(true);
+  state.phase = "plant";
+  state.gen = 0;
+  state.bestLit = 0;
+  state.bestLitGen = 0;
+  board.classList.remove("won");
+  cellsFromSeeds();
+  renderCells();
+  updateStatus();
+  say("Back to your planting. " + state.seeds.size + " seed" + (state.seeds.size === 1 ? "" : "s") + " still in place.");
+}
+
+function winLevel() {
+  stopClock();
+  state.phase = "won";
+  board.classList.add("won");
+  var L = LEVELS[state.li];
+  var used = state.seeds.size;
+  var score = used + state.gen + HINT_PENALTY * state.hintsUsed;
+  var prev = progress.best[state.li];
+  var isBest = !prev || score < prev.score;
+  if (isBest) progress.best[state.li] = { seeds: used, gens: state.gen, hints: state.hintsUsed, score: score };
+  if (progress.unlocked < state.li + 2) progress.unlocked = Math.min(LEVELS.length, state.li + 2);
+  saveProgress();
+  renderCells();
+  updateStatus();
+
+  var lines = [
+    "Every bud lit at generation " + state.gen + ".",
+    used + " seed" + (used === 1 ? "" : "s") + " of " + L.seeds + " · " + state.gen + " generation" + (state.gen === 1 ? "" : "s")
+      + (state.hintsUsed ? " · " + state.hintsUsed + " hint" + (state.hintsUsed === 1 ? "" : "s") + " (+" + (state.hintsUsed * HINT_PENALTY) + ")" : ""),
+    "Score " + score + (isBest ? " — new best." : " · best " + progress.best[state.li].score + ".")
+  ];
+  var actions = [];
+  var last = state.li === LEVELS.length - 1;
+  if (!last) actions.push({ label: "Next level", fn: function () { startLevel(state.li + 1); } });
+  else if (levelsDone() === LEVELS.length) actions.push({ label: "See the ending", fn: function () { showScreen("finale"); } });
+  actions.push({ label: "Retry", fn: resetToPlanting });
+  actions.push({ label: "Levels", fn: function () { showScreen("levels"); } });
+  openDialog("In bloom", lines, actions);
+  say("Solved. " + lines[0] + " " + lines[2]);
+}
+
+function lose() {
+  stopClock();
+  state.phase = "lost";
+  updateStatus();
+  var L = LEVELS[state.li];
+  var moment = state.bestLit === 0
+    ? "No bud ever lit."
+    : "Best: " + state.bestLit + " of " + state.buds.length + " buds, at generation " + state.bestLitGen + ".";
+  var lines = ["The clock ran out at generation " + state.gen + " of " + L.limit + ".", moment, "Your seeds are still in the soil — move one and try again."];
+  openDialog("Out of generations", lines, [
+    { label: "Retry", fn: resetToPlanting },
+    { label: "Levels", fn: function () { showScreen("levels"); } }
+  ]);
+  say("Out of generations. " + moment);
+}
+
+/* ---- hints ---- */
+function useHint() {
+  var L = LEVELS[state.li];
+  if (state.phase === "won" || state.phase === "lost") return;
+  if (state.hintsUsed >= L.hints) { refuse("No hints left on this bed.", null); return; }
+  var pick = -1;
+  for (var k = 0; k < state.sol.length; k++) {
+    var i = state.sol[k];
+    if (state.revealed.has(i)) continue;
+    if (state.seeds.has(i)) continue;
+    pick = i; break;
+  }
+  if (pick < 0) { refuse("Every hint cell is already planted.", null); return; }
+  state.revealed.add(pick);
+  state.hintsUsed++;
+  var r = Math.floor(pick / L.n) + 1, c = (pick % L.n) + 1;
+  renderCells();
+  updateStatus();
+  say("Hint: a solution seed sits at row " + r + ", column " + c + ". " + (L.hints - state.hintsUsed) + " hint" + (L.hints - state.hintsUsed === 1 ? "" : "s") + " left, +" + HINT_PENALTY + " score.");
+}
+
+/* ---- dialog ---- */
+function openPauseDialog(wasRunning) {
+  var L = LEVELS[state.li];
+  openDialog("Paused", [
+    "Generation " + state.gen + " of " + L.limit + " · " + budsLit() + " of " + state.buds.length + " buds lit.",
+    wasRunning ? "The clock is stopped." : "Nothing is growing yet."
+  ], [
+    { label: wasRunning ? "Resume" : "Back to the garden", fn: function () { closeDialog(); if (wasRunning) startGrow(); } },
+    { label: "Reset", fn: resetToPlanting },
+    { label: "Levels", fn: function () { showScreen("levels"); } }
+  ]);
+}
+
+function openDialog(title, lines, actions) {
+  dlgTitle.textContent = title;
+  dlgBody.replaceChildren();
+  for (var i = 0; i < lines.length; i++) {
+    var p = document.createElement("p");
+    p.className = i === 0 ? "" : "subhead";
+    p.textContent = lines[i];
+    dlgBody.appendChild(p);
+  }
+  dlgActions.replaceChildren();
+  for (var j = 0; j < actions.length; j++) {
+    (function (a, first) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "btn" + (first ? " primary" : "");
+      b.textContent = a.label;
+      b.addEventListener("click", a.fn);
+      dlgActions.appendChild(b);
+    })(actions[j], j === 0);
+  }
+  state.dialog = true;
+  panelControls.hidden = true;
+  dlg.hidden = false;
+  board.tabIndex = -1;
+  var f = dlgActions.querySelector("button");
+  if (f) f.focus();
+}
+
+function closeDialog(silent) {
+  dlg.hidden = true;
+  panelControls.hidden = false;
+  if (state) state.dialog = false;
+  board.tabIndex = 0;
+  if (!silent) board.focus();
+}
+
+dlg.addEventListener("keydown", function (e) {
+  if (e.key !== "Tab") return;
+  var items = dlgActions.querySelectorAll("button");
+  if (!items.length) return;
+  var first = items[0], last = items[items.length - 1];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+});
+
+/* ---- pointer ---- */
+board.addEventListener("pointerdown", function (e) {
+  if (currentScreen !== "game" || !state) return;
+  var el = e.target && e.target.closest ? e.target.closest(".cellwrap") : null;
+  if (!el) return;
+  e.preventDefault();
+  board.focus();
+  var i = Number(el.dataset.i);
+  if (state.phase !== "plant") { refuse(refusalReason(), el); return; }
+  moveCursorTo(i);
+  painting = state.seeds.has(i) ? "remove" : "add";
+  try { board.setPointerCapture(e.pointerId); } catch (err) { /* capture is optional */ }
+  toggleAt(i);
+});
+
+board.addEventListener("pointermove", function (e) {
+  if (painting === null || !state || state.phase !== "plant") return;
+  var el = document.elementFromPoint(e.clientX, e.clientY);
+  var w = el && el.closest ? el.closest(".cellwrap") : null;
+  if (!w || w.parentElement !== board) return;
+  var i = Number(w.dataset.i);
+  if (painting === "add" && state.seeds.has(i)) return;
+  if (painting === "remove" && !state.seeds.has(i)) return;
+  moveCursorTo(i);
+  plantAt(i, painting);
+});
+
+function endPaint() { painting = null; }
+window.addEventListener("pointerup", endPaint);
+window.addEventListener("pointercancel", endPaint);
+
+function moveCursorTo(i) {
+  if (!state || i < 0 || i >= cellEls.length) return;
+  state.cursor = i;
+  renderCursor();
+}
+
+/* ---- keyboard ---- */
+document.addEventListener("keydown", function (e) {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  var t = e.target;
+  var isBtn = t && t.tagName === "BUTTON";
+  if (e.key === "Escape") {
+    if (currentScreen === "howto" || currentScreen === "levels" || currentScreen === "finale") { e.preventDefault(); showScreen("title"); return; }
+    if (currentScreen === "game" && state) {
+      e.preventDefault();
+      if (state.dialog) {
+        if (state.phase === "won" || state.phase === "lost") showScreen("levels");
+        else closeDialog();
+      } else {
+        pauseGrow(true);
+      }
+    }
+    return;
+  }
+  if (currentScreen !== "game" || !state) return;
+  if (state.dialog) return;
+  if (isBtn && (e.key === "Enter" || e.key === " " || e.key === "Spacebar")) return;
+  var L = LEVELS[state.li];
+  var n = L.n;
+  var cur = state.cursor;
+  switch (e.key) {
+    case "ArrowUp": e.preventDefault(); board.focus(); moveCursorTo(cur - n < 0 ? cur : cur - n); break;
+    case "ArrowDown": e.preventDefault(); board.focus(); moveCursorTo(cur + n >= n * n ? cur : cur + n); break;
+    case "ArrowLeft": e.preventDefault(); board.focus(); moveCursorTo(cur % n === 0 ? cur : cur - 1); break;
+    case "ArrowRight": e.preventDefault(); board.focus(); moveCursorTo(cur % n === n - 1 ? cur : cur + 1); break;
+    case "Enter": case " ": case "Spacebar":
+      e.preventDefault();
+      toggleAt(state.cursor);
+      cellEls[state.cursor].setAttribute("aria-label", describe(state.cursor));
+      break;
+    case "g": case "G":
+      e.preventDefault();
+      if (state.running) pauseGrow(true); else startGrow();
+      break;
+    case "s": case "S":
+      e.preventDefault();
+      stopClock(); advance(); updateStatus();
+      break;
+    case "r": case "R": e.preventDefault(); resetToPlanting(); break;
+    case "h": case "H": e.preventDefault(); useHint(); break;
+    default: break;
+  }
+});
+
+/* ---- buttons ---- */
+btnGrow.addEventListener("click", function () {
+  if (state.running) pauseGrow(true); else startGrow();
+});
+btnStep.addEventListener("click", function () { stopClock(); advance(); updateStatus(); });
+btnReset.addEventListener("click", resetToPlanting);
+btnHint.addEventListener("click", useHint);
+$("btn-quit").addEventListener("click", function () { showScreen("levels"); });
+$("btn-play").addEventListener("click", function () {
+  var next = 0;
+  for (var i = 0; i < LEVELS.length; i++) { if (!progress.best[i]) { next = i; break; } if (i === LEVELS.length - 1) next = 0; }
+  if (next + 1 > progress.unlocked) next = progress.unlocked - 1;
+  startLevel(next);
+});
+$("btn-howto").addEventListener("click", function () { showScreen("howto"); });
+$("btn-levels").addEventListener("click", function () { showScreen("levels"); });
+var backs = document.querySelectorAll("[data-back]");
+for (var bi = 0; bi < backs.length; bi++) {
+  (function (el) {
+    el.addEventListener("click", function () { showScreen(el.getAttribute("data-back")); });
+  })(backs[bi]);
+}
+
+document.addEventListener("visibilitychange", function () {
+  if (document.hidden && state && state.running) pauseGrow(false);
+});
+
+/* ---- reference-solution harness (used to verify every level in this build) ---- */
+window.__bloom = {
+  levels: LEVELS,
+  step: stepCells,
+  verify: function () {
+    var out = [];
+    var back = currentScreen;
+    for (var li = 0; li < LEVELS.length; li++) {
+      var L = LEVELS[li];
+      startLevel(li);
+      var planted = 0;
+      for (var k = 0; k < L.sol.length; k++) {
+        if (plantAt(idxOf(L, L.sol[k][0], L.sol[k][1]), "add")) planted++;
+      }
+      var guard = 0;
+      while (state.phase !== "won" && state.phase !== "lost" && guard++ < 200) { advance(); }
+      out.push({
+        level: li + 1,
+        name: L.name,
+        par: L.seeds,
+        planted: planted,
+        seedsUsed: state.seeds.size,
+        result: state.phase,
+        gen: state.gen,
+        limit: L.limit,
+        budsLit: budsLit() + "/" + state.buds.length
+      });
+      closeDialog(true);
+    }
+    stopClock();
+    showScreen(back === "game" ? "levels" : back);
+    return out;
+  }
+};
+
+/* ---- boot ---- */
+progress = loadProgress();
+showScreen("title");
+</script>
+</body>
+</html>
