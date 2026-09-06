@@ -7,7 +7,8 @@
         "index.html",
         "patterns.png",
         "play.png",
-        "prompt.md"
+        "prompt.md",
+        "validate.json"
       ]
     },
     "exists": {
