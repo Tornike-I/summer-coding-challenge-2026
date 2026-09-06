@@ -2,11 +2,26 @@
 
 ## 1. "Task result (URL of your index.html)"
 
-**Not available yet — needs hosting.** See *Hosting* below.
+```
+https://tornike-i.github.io/summer-coding-challenge-2026/final%20submission/
+```
+
+Live and verified: HTTP 200, `text/html`, 53 707 bytes — the exact file — loading in standards mode with
+a silent console and reaching the play screen.
+
+**Note the `%20`.** The directory name has a space in it. The encoded form above is the safe one to paste;
+a literal space will usually be fixed up by the browser, but not always by a form. If you would rather
+have a clean URL, say so and I will put a copy at the repo root so it becomes
+`https://tornike-i.github.io/summer-coding-challenge-2026/`.
 
 ## 2. "Solution to the task (URL of your prompt.md)"
 
-**Not available yet — needs hosting.** See *Hosting* below.
+```
+https://github.com/Tornike-I/summer-coding-challenge-2026/blob/master/final%20submission/prompt.md
+```
+
+Renders the prompt as a readable page. The raw link also works if you prefer plain text:
+`https://raw.githubusercontent.com/Tornike-I/summer-coding-challenge-2026/master/final%20submission/prompt.md`
 
 ## 3. "Application description, AI agent name, tooling used, model version and any other settings."
 
@@ -33,36 +48,27 @@ Celá aplikace je obsažená v jediném souboru index.html. Otevře se v běžn�
 
 ---
 
-# Hosting — what fields 1 and 2 need
+# Hosting — done
 
-Both files must be at public URLs before the form can be submitted. The repo is private, so its links
-will not work for the judges.
+The repo `Tornike-I/summer-coding-challenge-2026` is **public** and GitHub Pages is enabled on `master`,
+so both links above are live.
 
-**Field 1 should render the game, not show its source.** The judges open it in a clean browser profile;
-a `raw.githubusercontent.com` link serves HTML as `text/plain`, so they would see code instead of a
-playable game. GitHub Pages serves it as a real page.
+One consequence worth knowing: the repo is public, so a judge who navigates up from either link can read
+`LOG.md` and `DECISIONS.md` — including the blind judges' scores for this game and the two that lost.
+Nothing there is embarrassing, but it does hand the jury numbers they are meant to assign themselves.
 
-## Recommended: a small public repo with Pages
+**Field 1 renders the game rather than showing its source**, which is the point of using Pages — a
+`raw.githubusercontent.com` link would serve the HTML as `text/plain` and the judges would see code.
 
-Create a public repo containing just `index.html` and `prompt.md`, enable Pages on the default branch,
-and the two answers become:
+## Verified live
 
-```
-Field 1:  https://<user>.github.io/<repo>/
-Field 2:  https://github.com/<user>/<repo>/blob/main/prompt.md
-```
+| | |
+|---|---|
+| HTTP status | 200 |
+| Content type | `text/html; charset=utf-8` |
+| Bytes served | 53 707 — identical to the local file |
+| Rendering mode | `CSS1Compat` (standards) |
+| Console | silent |
+| Play screen | reached, with the Patterns button present |
 
-Field 2 can also be the raw link — `prompt.md` reads fine either way, and the blob view renders it
-nicely.
-
-## Alternative: make the existing repo public
-
-Faster, but it publishes the whole working record — `LOG.md`, `DECISIONS.md`, every candidate prompt and
-the blind judges' verdicts on all of them, including the two games that lost. Nothing there is
-embarrassing, but it is a lot of context handed to the jury that they did not ask for, and it names
-scores the jury is meant to assign themselves.
-
-## Check after publishing
-
-Open the field 1 URL in a private window before submitting. You should get a playable game, not source
-code and not a 404.
+Open it in a private window yourself before submitting, as a last sanity check.
