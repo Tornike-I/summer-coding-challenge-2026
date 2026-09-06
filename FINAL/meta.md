@@ -17,12 +17,12 @@ Measured wall-clock, single agent per run.
 | game | run used | duration | notes |
 |---|---|---|---|
 | paradox-loop | attempt 4 | **51 min** | 98 tool calls. Inside the contest's 60-minute cap, but not by much. |
-| bloom | run 2 | not recorded | The agent was stopped by me while still in its self-verification phase; the file it had already written is what ships. |
+| bloom | r3 run 1 | **51 min** | 139 tool calls. A clean, complete, unattended run — it finished on its own judgement. |
 | districts | run 1 | not recorded | Same — stopped during self-verification. |
 
-**Be straight about this on the form if asked**: the Bloom and Districts runs were interrupted by me
-partway through their own final checks, so their true unattended duration is unknown. Only
-paradox-loop has a clean, complete, measured run. None of the three was edited by hand afterwards.
+**Be straight about this on the form if asked**: the Districts run was interrupted by me partway through
+its own final checks, so its true unattended duration is unknown. Bloom and paradox-loop both have clean,
+complete, measured runs. None of the three was edited by hand afterwards.
 
 ## Verification tooling (mine, not the agent's)
 

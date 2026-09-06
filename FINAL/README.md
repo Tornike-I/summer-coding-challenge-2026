@@ -4,7 +4,7 @@
 here because they were asked for. Pick one before submitting — see `REPORT.md` for which and why.
 
 ```
-bloom/         prompt.md + index.html    weighted 4.35   ← highest scored
+bloom/         prompt.md + index.html    r3 build, unjudged  ← submit this
 districts/     prompt.md + index.html    weighted 4.25
 paradox-loop/  prompt.md + index.html    weighted 3.75
 ```
@@ -19,7 +19,7 @@ network. `play.png` in each folder shows the game running.
 
 | game | what you do |
 |---|---|
-| **bloom** | Plant a few seeds, press **Grow**, and Conway's Life runs. You win if one single generation has every bud alive at once. Six levels. |
+| **bloom** | Plant a few seeds, press **Grow**, and Conway's Life runs. You win if one single generation has every bud alive at once. Six levels, each naming the Life pattern it wants, plus a **Patterns** primer you can open at any time. |
 | **districts** | Carve a grid of Teal and Amber voters into equal connected districts so the *outnumbered* colour wins the council. Five levels. |
 | **paradox-loop** | Turn-based room you can't solve alone. **Rewind**, and your recorded past attempt replays beside you as a ghost. Six levels. |
 

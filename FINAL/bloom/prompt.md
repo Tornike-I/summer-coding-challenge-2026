@@ -15,107 +15,123 @@ Puzzle golf on a cellular automaton: two lines of rules, and a solution space no
 
 ## 2. Rules — implement exactly these, they are the specification
 
-- **Grid.** Bounded, 12x12 up to 16x16. Everything outside the grid is permanently dead — no wrapping.
-- **Life.** Standard B3/S23: a dead cell with exactly three live neighbours becomes alive; a live cell with
-  two or three live neighbours survives; everything else dies. All eight neighbours count. Every cell
-  updates simultaneously from the previous generation — compute into a new buffer, never in place.
-- **Planting.** Before growing, click or tap any cell to toggle a seed. A level gives you **at most N
-  seeds** (the par) and marks some cells as **stone**: stone cells can never be seeded, but they take part
-  in Life normally. Seeding is refused, visibly, when you are out of seeds or the cell is stone.
-- **Growing.** Grow runs generation by generation, roughly four per second, up to the level's generation
-  limit. Step advances exactly one. Pause holds. Reset returns to your planting, seeds intact, so you can
-  adjust rather than start over — this matters, make it one click.
-- **Winning.** The instant a generation has every bud alive simultaneously, you win — freeze the board and
-  celebrate. Extra live cells elsewhere are fine; the buds are the only requirement.
-- **Losing.** The generation limit passes without that happening. Do not just say "failed": report the
-  best moment — "best: 3 of 4 buds, at generation 11" — and offer Retry with the seeds still in place.
-- **Score.** Seeds used and generations taken; fewer of each is better. Keep a per-level best.
-- **Hint.** Reveals one cell of the reference solution, once per press, at a marked score penalty. Cap it,
-  show how many remain, and never let it reveal a cell the player has already planted.
+- **Grid.** Bounded, 12x12 up to 16x16. Everything outside it is permanently dead — no wrapping.
+- **Life.** B3/S23 on all eight neighbours: three live neighbours births a dead cell, two or three keeps a
+  live one alive, everything else dies. Step into a fresh buffer, never in place.
+- **Planting.** Click or tap a cell to toggle a seed. A level allows **at most N seeds** (the par) and
+  marks some cells **stone** — stone can never be seeded but takes part in Life normally. Seeding is
+  refused, visibly, when you are out of seeds or the cell is stone.
+- **Growing.** Grow runs about four generations a second up to the level's limit. Step advances one.
+  Pause holds. Reset returns to your planting with the seeds intact, so you can adjust one cell rather
+  than start over — one click, and it matters.
+- **Winning.** The instant one generation has every bud alive at once, freeze the board and celebrate.
+  Extra live cells elsewhere are fine. **The check starts at generation 1**, after Grow has run at
+  least one step — planting straight onto the buds and declaring victory is not a solution, and
+  without this every level with more seeds than buds has a degenerate answer.
+- **Losing.** The limit passes without that happening. Never just say "failed" — report the best moment
+  ("best: 3 of 4 buds, at generation 11") and offer Retry with the seeds still in place.
+- **Score.** Seeds used and generations taken, fewer better, with a per-level best.
+- **Hint.** Reveals one cell of the reference solution at a marked score penalty. Cap it, show how many
+  remain, and never reveal a cell already planted. Scale the cap to the size of the solution — a level
+  needing ten precise cells cannot be hinted with three.
+- **Pattern primer — this is what makes the game learnable.** A player who does not know Life's small
+  vocabulary is not stuck on the puzzle, they are stuck on the alphabet. Ship a named catalogue of the
+  patterns your levels use — at least a still life, an oscillator and a spaceship — each with a plain
+  one-liner for what it *does* ("never changes", "flips every step", "walks diagonally, one cell every
+  four"). Draw each as a small grid **animated by your own Life engine**, never a hand-drawn loop, so the
+  primer cannot disagree with the game. Put it in How to play *and* one tap away during play, as a
+  **Patterns** button beside Hint. Reference only: opening it costs nothing and stamps nothing.
+- **Name the wanted pattern in each level's brief**, in plain words, before any hint is spent — "this one
+  wants something that walks". A stuck player should learn the vocabulary, not guess coordinates.
 
-**Design every level backwards, and this is not optional:** pick a legal seed pattern of at most N cells,
-run your own Life implementation forward, look at the live cells at some generation G, and take a subset of
-them as the buds. This guarantees the level is solvable, hands you the generation limit (a comfortable
-margin above G) and hands you the reference solution the Hint needs. Verify each finished level by running
-its reference solution through the shipped game logic. Do not ship a level you have not seen solved.
-Delete any scratch files afterwards.
+**Design every level backwards, and this is not optional:** choose a legal seed of at most N cells, run
+your own Life forward, and take a subset of the live cells at some generation G as the buds. That
+guarantees solvability, hands you the generation limit (a comfortable margin above G) and hands you the
+reference solution the Hint needs. Then verify each level by running its reference solution through the
+**shipped** game logic. Never ship a level you have not seen solved. Delete scratch files afterwards.
 
 **Six levels** in this teaching order — you invent the exact boards:
-1. Three buds in a row, two seeds spare. Teaches planting and Grow — a blinker will do it.
-2. Buds that a glider must travel to. Teaches that patterns move.
+1. Three buds in a row, two seeds spare. A blinker does it — teaches planting and Grow.
+2. Buds a glider must travel to. Teaches that patterns move.
 3. Buds reachable only if two small patterns collide.
-4. Stone cells appear and block the obvious route.
-5. A tight par: exactly the seed count needed, no spare.
-6. The finale — a longer run, two clusters that must arrive in step.
+4. Stone appears and blocks the obvious route.
+5. A tight par: exactly the seeds needed, none spare.
+6. The finale — a longer run, two clusters arriving in step.
+
+If a level needs a precise multi-cell construction, its hints must be able to get a stuck player there.
 
 ## 3. Screens and states — all of them must exist and be reachable
 
-Title (name, one-line hook, Play, How to play, Levels) → How to play (the two Life rules shown as three
-tiny animated CSS grids, not a wall of text) → Level select (locked levels visibly locked, best score or an
-em-dash when never played) → Planting → Growing → Paused → Solved (seeds, generations, best, Next / Retry)
-→ Out of generations (best-moment report, Retry / Back) → All levels complete (a real ending screen).
-A persistent status bar shows level, seeds left, generation of limit, and buds currently lit.
+Title (name, one-line hook, Play, How to play, Levels) → How to play (the two Life rules and the pattern
+primer, all as small live grids running the real engine, not a wall of text) → Level select (locked levels visibly locked, best score or an
+em-dash when never played) → Planting → Growing → Paused → Solved (seeds, generations, best,
+Next / Retry) → Out of generations (best-moment report, Retry / Back) → All levels complete (a real
+ending screen). A status bar during play shows level, seeds left, generation of limit, and buds lit.
 
 ## 4. Controls
 
-Mouse, touch and keyboard all complete. Use **pointer events** so dragging across cells to plant several
-works identically with a finger and a mouse; set `touch-action: none` on the board. Keyboard: arrows move a
-visible cursor, Enter or Space toggles a seed, G grows, S steps, R resets to your planting, Esc pauses.
-Every action also exists as a visible on-screen button. Tap targets at least 44px.
+Pointer, touch and keyboard all complete. Use **pointer events** so dragging across cells to plant several
+works the same with a finger and a mouse; `touch-action: none` on the board. Keyboard: arrows move a
+visible cursor, Enter or Space toggles a seed, G grows, S steps, R resets, H hints, Esc pauses. Every
+action also has a visible on-screen button, and every shortcut is listed where the player can find it.
+Tap targets at least 44px.
 
 ## 5. Hard technical constraints
 
-- Exactly one file: `index.html`, with all CSS and JS inline in it.
-- **Zero network.** No CDN, no web fonts, no images, no audio files, no `fetch`/`XMLHttpRequest`/WebSocket,
-  no `import`. Do not reference any `http://` or `https://` URL anywhere. Use a system font stack.
+- One file, all CSS and JS inline. No build step.
+- **Zero network**: no CDN, web fonts, images, audio files, `fetch`/`XMLHttpRequest`/WebSocket or
+  `import`, and no `http://` or `https://` URL anywhere. System font stack.
 - **No `<script type="module">`** — modules are blocked under `file://`. One plain inline script.
-- All graphics drawn in code: CSS, DOM and inline SVG. Build the grid as a CSS Grid of elements, not a
-  canvas — it stays crisp, responsive and accessible. Sparing emoji are fine; no other characters as art.
-- Drive the generation clock with `setInterval` or a `requestAnimationFrame` loop that you **stop** on
-  pause, win, loss and screen change. No orphaned timers — leaking one is the classic way this game breaks.
-- **Zero console errors or warnings** during a whole playthrough.
-- Persist best scores and progress in `localStorage` under one namespaced key, every access wrapped in
-  `try`/`catch`. Under `file://` storage can be unavailable or throw — the game must stay **fully
-  playable** in that case, silently falling back to in-memory state. Treat malformed or foreign stored
-  data as absent rather than trusting it.
-- No audio by default. If you add sound, make it generated WebAudio behind a toggle that is **off** until
-  the player turns it on, and never let it throw.
+- Every graphic drawn in code: CSS, DOM, inline SVG. The grid is a CSS Grid of elements, not a canvas —
+  it stays crisp, responsive and accessible.
+- Stop the generation clock on pause, win, loss and every screen change. A leaked timer is the classic
+  way this game breaks.
+- **Zero console errors or warnings** in a whole playthrough.
+- Persist progress in `localStorage` under one namespaced key, every access wrapped in `try`/`catch`.
+  Storage can be unavailable or throw under `file://`; the game must stay **fully playable**, falling
+  back to memory. Treat malformed or foreign stored data as absent.
+- No audio unless it is generated WebAudio behind a toggle that starts **off** and cannot throw.
 
 ## 6. Design and accessibility — this is scored
 
-One coherent palette driven by CSS custom properties — a dark soil background, one luminous hue for living
-cells, a distinct outlined treatment for buds so a lit bud and an unlit bud are told apart by **shape as
-well as colour**, and a flat muted stone. Living cells should feel alive: a short scale-in as they are
-born, a fade as they die, both suppressed under reduced motion. Generous spacing, one readable size ramp.
+One palette in CSS custom properties: dark soil, one luminous hue for living cells, flat muted stone, and
+buds outlined so a lit and an unlit bud differ in **shape as well as colour**. **The board is the screen
+the player never leaves — give it real contrast**: an empty cell must read clearly against the soil and an
+unplanted seed must be obvious at 375px, or the mechanic you are selling is invisible. Cells scale in as
+they are born and fade as they die, both dropped under reduced motion.
 
-- Responsive from 320px to 1920px. The board scales to fit; **never any horizontal scrolling**, and on a
-  375x667 phone the whole game — board, status bar and controls — fits without the page scrolling.
-- Respect `prefers-reduced-motion: reduce`: drop every transition and animation, keep every state change.
-- Real `<button>` elements, visible focus outlines, sensible labels, and an ARIA live region announcing
-  generation milestones, refused plantings, wins and losses.
+- Responsive 320px to 1920px, never a horizontal scroll. At 375x667 the whole game fits without the page
+  scrolling. On a wide screen use the width — board beside the status and controls, not a phone-shaped
+  column stranded in the middle.
+- `prefers-reduced-motion: reduce` drops every transition and animation and keeps every state change.
+- Real `<button>`s, visible focus outlines, an ARIA live region for refusals, milestones, wins and losses.
+  Modals trap Tab and leave the background out of the tab order.
+- Do not let the win overlay cover the board. The player just engineered that pattern; let them see it.
 
 ## 7. Verify before you declare it finished
 
-If you can run a browser or headless browser, open the file from `file://`, read the console, and play.
-If you cannot, re-read your finished file top to bottom and trace each path by hand. Either way, walk all
-of these and fix what you find:
+If you can drive a browser, open the file from `file://`, read the console and play it. If you cannot,
+re-read the finished file top to bottom and trace each path by hand. Either way, walk these and fix what
+you find:
 
-1. First ever load, empty storage: no `undefined`, no `NaN`, no empty boxes on screen.
-2. Every screen in section 3 reachable, and every button on it does something.
-3. Each of the six levels solved by its reference solution, inside the shipped game.
-4. Life is correct: a blinker oscillates with period 2, a block stays still, a glider moves diagonally and
-   dies cleanly at the wall.
-5. Refused input: seed a stone cell, seed with zero seeds left, plant during Grow.
-6. Grow with zero seeds planted; Reset mid-grow; Step past the limit; pause, resume, leave and return —
-   no timer keeps running in the background.
-7. Reload mid-game, then reload with storage disabled entirely.
-8. 375x667 and 1440x900: no horizontal scroll, nothing clipped or overlapping.
+1. First load with empty storage, then a reload mid-game, then a reload with storage disabled — no
+   `undefined`, no `NaN`, no empty boxes, still playable.
+2. Every screen reachable, every button does something.
+3. Every level solved by its reference solution inside the shipped game.
+4. Every primer pattern behaves as its one-liner claims when stepped by the shipped engine, and the
+   Patterns panel opens and closes from both How to play and the play screen.
+5. Life is right: blinker period 2, block still, glider travels diagonally and dies cleanly at the wall.
+6. Refusals: stone, zero seeds left, planting during Grow.
+7. Grow with nothing planted; Reset mid-grow; Step past the limit; pause, resume, leave and return with
+   no timer still running.
+8. 375x667 and 1440x900: nothing clipped, overlapping or scrolling sideways.
 9. Re-read for undeclared variables, use-before-definition, and listeners added in a loop.
 
-## 8. Final checklist — tick every line, fix anything unticked, then stop
+The back half must be winnable by someone who has never seen Life before: between the primer, the named
+brief and the hints, a stuck player always has a next thing to try.
 
-☐ one file `index.html`, nothing else in the directory ☐ no `http`/`https` reference anywhere ☐ no modules
-☐ opens from `file://` with an empty console ☐ every level designed backwards from a verified seed and
-solved in the shipped build ☐ B3/S23 correct on a bounded grid ☐ no orphaned timers ☐ every screen and
-button works ☐ storage failure is survivable ☐ no horizontal scroll at 320px ☐ reduced motion respected
-☐ pointer, keyboard and touch all complete
+## 8. Before you stop
+
+Two things decide whether this shipped, and neither shows in the code: **every level was designed
+backwards from a seed you actually ran forward, and you watched that seed win inside the finished
+build.** If either is untrue of any level, the game is broken however good it looks. Fix it, then stop.

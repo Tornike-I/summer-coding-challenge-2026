@@ -2,9 +2,11 @@
 
 ## What to submit
 
-**Submit `bloom/`.** It scored highest (4.35 weighted), it is the only candidate whose two independent
-runs both scored above 4.2, and its prompt contains the single instruction that made every good build in
-this exercise good. `districts/` (4.25) is a defensible alternative if you prefer its look — it is the
+**Submit `bloom/`.** The build here is the **r3 revision, which has not been judged** — it replaced the
+4.35-scoring r2 build after the game proved hard to grasp on first contact. It adds a pattern primer and
+fixes three defects judges named against its predecessor. It is validated (25/25 in isolation) and
+verified by hand, but its score is unknown; the lineage it comes from scored 4.25 and 4.35, and the
+changes are all in the direction judges asked for. `districts/` (4.25) is a defensible alternative if you prefer its look — it is the
 better-looking game on a phone. `paradox-loop/` (3.75) should not be submitted; it is here because you
 asked for all three.
 
@@ -17,7 +19,7 @@ screenshots. Never my notes, never which candidate or round.
 
 | build | theme+runs | orig | UX | prompt | repro | **weighted** |
 |---|:--:|:--:|:--:|:--:|:--:|:--:|
-| **bloom** (`r1-bloom/run-2`) | 5 | 4 | 4 | 4 | 5 | **4.35** |
+| `r1-bloom/run-2` — *superseded by the r3 build now in `bloom/`* | 5 | 4 | 4 | 4 | 5 | **4.35** |
 | `r1-bloom/run-1` | 5 | 4 | 4 | 4 | 4 | 4.25 |
 | **districts** (`r1-districts/run-1`) | 5 | 4 | 4 | 4 | 4 | **4.25** |
 | `r1-districts/run-2` | 5 | 4 | 4 | 4 | 4 | 4.25 |
@@ -49,11 +51,16 @@ nothing checkable; telling it *how to know* produces levels that are provably so
   most familiar automaton in the room; gerrymandering puzzles are recognisable prior art; ghost-replay
   co-op is a known genre. Originality is 25 % of the score and **this is the ceiling on the whole entry**.
   Fixing it needs a different idea, not a better build.
-- **Bloom's board is too dim.** Confirmed visually in `bloom/play.png`: empty cells barely separate from
-  the background and an unplanted seed is hard to spot at phone width — on the one screen the player never
-  leaves. The judge called it the biggest weakness. The win overlay also covers the board you just built.
-- **Bloom's back half is hard.** Levels 3 and 6 need two exactly-positioned, exactly-phased gliders
-  against three hints. A player who does not already know Life patterns has no route from stuck to solved.
+- **Bloom's r3 build is unjudged.** Everything below it in this list was found by a judge; the r3 build
+  has only my own validation and a hand playthrough behind it. One blind judgement would settle whether
+  the primer moved UX and whether the longer prompt cost anything on economy.
+- **Bloom's prompt is now 9 580 characters against a 10 000 cap.** Compliant, but economy is part of the
+  20 % prompt score, and this is the least economical prompt in the exercise. The primer bullet is the
+  first thing to compress if that matters more than the feature.
+- ~~Bloom's board is too dim~~ and ~~the back half is unlearnable~~ were the two biggest complaints
+  against the previous build. Both are addressed in r3 — the board grid now reads clearly, each level
+  names the pattern it wants in plain words, and a Patterns panel is one tap away during play. Verified
+  visually in `bloom/play.png` and `bloom/patterns.png`.
 - **Districts is a phone that tolerates a desktop.** At 1440px it is a 640px column adrift in dead space.
   Its modals also do not trap focus.
 - **Paradox Loop ships a broken level.** My prompt says a door opens "while at least one plate of its
@@ -75,10 +82,10 @@ nothing checkable; telling it *how to know* produces levels that are provably so
    build from another.
 4. **Nothing here was hand-edited.** Every `index.html` is raw agent output. If you change so much as a
    character before submitting, the entry breaks the rules.
-5. **Bloom's prompt is 8 630 characters** against a 10 000 limit — compliant, but "úsporně" (economy) is
-   part of the 20 % prompt score, and every judge docked it for a closing checklist that restates earlier
-   sections. A revised, denser version exists at `candidates/r2-bloom/prompt.md` (8 351 chars, redundancy
-   removed, five defects addressed), but **its build was never judged**, so it is not what ships here.
+5. **Play Bloom yourself before submitting.** The r3 build has no blind judgement behind it — it was
+   swapped in because the game was hard to grasp, and the fix is the kind of thing you should confirm by
+   feel rather than by checklist. Open `bloom/index.html`, hit Play, and see whether level 1's brief and
+   the Patterns panel actually get you moving.
 
 ## What was left undone
 

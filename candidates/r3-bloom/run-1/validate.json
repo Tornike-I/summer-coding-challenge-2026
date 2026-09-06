@@ -1,13 +1,10 @@
 {
-  "runDir": "C:\\Users\\USER\\ccMC\\scc2026\\FINAL\\bloom",
+  "runDir": "C:\\Users\\USER\\ccMC\\scc2026\\candidates\\r3-bloom\\run-1",
   "checks": {
     "single_file": {
-      "pass": false,
+      "pass": true,
       "detail": [
-        "index.html",
-        "patterns.png",
-        "play.png",
-        "prompt.md"
+        "index.html"
       ]
     },
     "exists": {
@@ -132,9 +129,7 @@
   "lines": 1402,
   "buttonCount": 20,
   "firstScreenText": "Bloom\n\nPlant a few seeds, press Grow, and let Conway’s Life light every bud — you never touch the garden again.\n\nPlay\nHow to play\nLevels\nSound: off\n\nSix gardens. None bloomed yet.",
-  "passed": 24,
+  "passed": 25,
   "total": 25,
-  "failed": [
-    "single_file"
-  ]
+  "failed": []
 }
